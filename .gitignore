@@ -4,3 +4,4 @@ frontend/public/model/
 frontend/.env
 .firebase/
 firebase-debug.log
+.agents/
