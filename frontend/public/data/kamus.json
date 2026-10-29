@@ -1,0 +1,355 @@
+[
+  {
+    "nama": "Sisa nasi dan lauk",
+    "alias": [
+      "makanan sisa",
+      "sisa makan"
+    ],
+    "kelas": "organik",
+    "alasan": "Sisa makanan mudah terurai dan bisa dikompos.",
+    "tips": "Pisahkan dari kemasan. Tulang dan minyak banyak sebaiknya tidak masuk komposter rumahan."
+  },
+  {
+    "nama": "Kulit buah",
+    "alias": [
+      "kulit pisang",
+      "kulit jeruk",
+      "kulit mangga"
+    ],
+    "kelas": "organik",
+    "alasan": "Kulit buah terurai alami dan baik untuk kompos.",
+    "tips": "Potong kecil agar lebih cepat terurai."
+  },
+  {
+    "nama": "Daun kering",
+    "alias": [
+      "daun",
+      "ranting kecil"
+    ],
+    "kelas": "organik",
+    "alasan": "Daun adalah bahan kompos yang bagus.",
+    "tips": "Campurkan dengan sisa dapur agar kompos tidak terlalu basah."
+  },
+  {
+    "nama": "Ampas kopi",
+    "alias": [
+      "ampas teh",
+      "kopi bekas"
+    ],
+    "kelas": "organik",
+    "alasan": "Ampas kopi dan teh bisa dikompos.",
+    "tips": "Pisahkan dari kantong teh yang mengandung plastik."
+  },
+  {
+    "nama": "Cangkang telur",
+    "alias": [
+      "kulit telur"
+    ],
+    "kelas": "organik",
+    "alasan": "Cangkang telur bisa dikompos.",
+    "tips": "Remukkan agar lebih cepat terurai."
+  },
+  {
+    "nama": "Botol plastik",
+    "alias": [
+      "botol air mineral",
+      "botol pet",
+      "botol minum plastik"
+    ],
+    "kelas": "anorganik",
+    "alasan": "Plastik PET umumnya bisa didaur ulang bila bersih.",
+    "tips": "Kosongkan, bilas singkat, lepaskan tutup, lalu setor ke bank sampah."
+  },
+  {
+    "nama": "Gelas plastik",
+    "alias": [
+      "gelas air mineral",
+      "cup plastik"
+    ],
+    "kelas": "anorganik",
+    "alasan": "Gelas plastik bersih dapat didaur ulang.",
+    "tips": "Buang sisa isi dan tumpuk agar hemat tempat."
+  },
+  {
+    "nama": "Kantong plastik",
+    "alias": [
+      "kresek",
+      "tas plastik"
+    ],
+    "kelas": "anorganik",
+    "alasan": "Kantong plastik bisa didaur ulang bila bersih dan kering.",
+    "tips": "Pakai ulang sebanyak mungkin sebelum dibuang."
+  },
+  {
+    "nama": "Kaleng minuman",
+    "alias": [
+      "kaleng soda",
+      "kaleng aluminium"
+    ],
+    "kelas": "anorganik",
+    "alasan": "Logam seperti aluminium bernilai tinggi untuk daur ulang.",
+    "tips": "Kosongkan dan tekan agar ringkas."
+  },
+  {
+    "nama": "Kaleng makanan",
+    "alias": [
+      "kaleng sarden",
+      "kaleng susu"
+    ],
+    "kelas": "anorganik",
+    "alasan": "Kaleng logam umumnya bisa didaur ulang.",
+    "tips": "Bilas dari sisa makanan. Hati-hati tepi yang tajam."
+  },
+  {
+    "nama": "Botol kaca",
+    "alias": [
+      "botol sirup",
+      "botol selai",
+      "toples kaca"
+    ],
+    "kelas": "anorganik",
+    "alasan": "Kaca bisa didaur ulang dan dipakai ulang.",
+    "tips": "Bilas dan jangan dipecahkan agar aman bagi petugas."
+  },
+  {
+    "nama": "Tutup botol",
+    "alias": [
+      "tutup galon",
+      "tutup plastik"
+    ],
+    "kelas": "anorganik",
+    "alasan": "Tutup plastik bisa didaur ulang.",
+    "tips": "Kumpulkan terpisah dari botol bila diminta bank sampah."
+  },
+  {
+    "nama": "Kardus bersih",
+    "alias": [
+      "dus",
+      "kotak kardus",
+      "karton"
+    ],
+    "kelas": "kertas",
+    "alasan": "Kardus kering dan bersih bisa didaur ulang.",
+    "tips": "Ratakan dan lepaskan lakban."
+  },
+  {
+    "nama": "Koran dan majalah",
+    "alias": [
+      "koran bekas",
+      "majalah",
+      "buku bekas"
+    ],
+    "kelas": "kertas",
+    "alasan": "Kertas cetak bisa didaur ulang.",
+    "tips": "Jaga tetap kering."
+  },
+  {
+    "nama": "Kertas HVS",
+    "alias": [
+      "kertas print",
+      "kertas fotokopi",
+      "kertas bekas"
+    ],
+    "kelas": "kertas",
+    "alasan": "Kertas kantor bersih bisa didaur ulang.",
+    "tips": "Pakai kedua sisi sebelum dibuang."
+  },
+  {
+    "nama": "Kardus berminyak",
+    "alias": [
+      "kotak pizza berminyak",
+      "dus berminyak"
+    ],
+    "kelas": "residu",
+    "alasan": "Minyak merusak proses daur ulang kertas.",
+    "tips": "Sobek bagian yang bersih untuk kertas dan buang bagian berminyak ke residu."
+  },
+  {
+    "nama": "Kertas pembungkus gorengan",
+    "alias": [
+      "kertas minyak",
+      "kertas nasi berminyak"
+    ],
+    "kelas": "residu",
+    "alasan": "Kertas berminyak tidak cocok didaur ulang.",
+    "tips": "Pilih wadah yang bisa dipakai ulang."
+  },
+  {
+    "nama": "Struk belanja",
+    "alias": [
+      "struk",
+      "nota",
+      "struk kasir"
+    ],
+    "kelas": "residu",
+    "alasan": "Kertas termal berlapis kimia sehingga tidak ideal didaur ulang.",
+    "tips": "Minta struk digital bila tersedia."
+  },
+  {
+    "nama": "Tisu bekas",
+    "alias": [
+      "tisu",
+      "tissue",
+      "tisu basah"
+    ],
+    "kelas": "residu",
+    "alasan": "Tisu bekas pakai tidak didaur ulang.",
+    "tips": "Pakai sapu tangan atau lap kain untuk mengurangi tisu."
+  },
+  {
+    "nama": "Puntung rokok",
+    "alias": [
+      "rokok",
+      "filter rokok"
+    ],
+    "kelas": "residu",
+    "alasan": "Filter rokok mengandung plastik dan sulit diolah.",
+    "tips": "Matikan api sepenuhnya lalu buang ke tong residu."
+  },
+  {
+    "nama": "Popok sekali pakai",
+    "alias": [
+      "popok",
+      "diaper",
+      "pampers"
+    ],
+    "kelas": "residu",
+    "alasan": "Popok tercampur kotoran dan bahan serap sintetis.",
+    "tips": "Buang isi ke toilet, gulung dan ikat rapat, lalu masukkan ke residu."
+  },
+  {
+    "nama": "Pembalut",
+    "alias": [
+      "pembalut wanita"
+    ],
+    "kelas": "residu",
+    "alasan": "Pembalut bekas tidak bisa didaur ulang.",
+    "tips": "Bilas dan bungkus rapat sebelum dibuang."
+  },
+  {
+    "nama": "Masker bekas",
+    "alias": [
+      "masker medis",
+      "masker sekali pakai"
+    ],
+    "kelas": "residu",
+    "alasan": "Masker sekali pakai terbuat dari serat sintetis.",
+    "tips": "Gunting tali, lalu bungkus sebelum dibuang."
+  },
+  {
+    "nama": "Styrofoam kotor",
+    "alias": [
+      "styrofoam",
+      "kotak makan styrofoam"
+    ],
+    "kelas": "residu",
+    "alasan": "Styrofoam yang kotor sulit didaur ulang.",
+    "tips": "Hindari styrofoam. Bawa wadah makan sendiri."
+  },
+  {
+    "nama": "Sachet kemasan",
+    "alias": [
+      "sachet kopi",
+      "sachet shampoo",
+      "kemasan berlapis"
+    ],
+    "kelas": "residu",
+    "alasan": "Kemasan multilapis sulit dipisahkan dan didaur ulang.",
+    "tips": "Pilih kemasan isi ulang atau ukuran besar."
+  },
+  {
+    "nama": "Permen karet",
+    "alias": [
+      "bekas permen karet"
+    ],
+    "kelas": "residu",
+    "alasan": "Permen karet tidak terurai dan sulit diolah.",
+    "tips": "Bungkus dengan kertas sebelum dibuang."
+  },
+  {
+    "nama": "Baterai bekas",
+    "alias": [
+      "baterai",
+      "aki kecil",
+      "baterai remote",
+      "baterai jam"
+    ],
+    "kelas": "b3",
+    "alasan": "Baterai mengandung logam berat dan bahan kimia.",
+    "tips": "Kumpulkan dalam wadah tertutup dan setor ke titik B3."
+  },
+  {
+    "nama": "Lampu neon",
+    "alias": [
+      "lampu hemat energi",
+      "lampu TL",
+      "bohlam neon"
+    ],
+    "kelas": "b3",
+    "alasan": "Lampu neon mengandung merkuri dan mudah pecah.",
+    "tips": "Simpan dalam kemasan aslinya agar tidak pecah."
+  },
+  {
+    "nama": "Ponsel dan elektronik rusak",
+    "alias": [
+      "hp rusak",
+      "elektronik",
+      "e-waste",
+      "laptop rusak"
+    ],
+    "kelas": "b3",
+    "alasan": "Perangkat elektronik mengandung logam berat dan baterai.",
+    "tips": "Setor ke titik e-waste, hapus data pribadi lebih dulu."
+  },
+  {
+    "nama": "Kabel dan charger bekas",
+    "alias": [
+      "charger",
+      "kabel data",
+      "adaptor"
+    ],
+    "kelas": "b3",
+    "alasan": "Limbah elektronik mengandung logam dan komponen berbahaya.",
+    "tips": "Kumpulkan dan setor bersama e-waste."
+  },
+  {
+    "nama": "Kaleng aerosol",
+    "alias": [
+      "kaleng semprot",
+      "pylox",
+      "parfum semprot"
+    ],
+    "kelas": "b3",
+    "alasan": "Kaleng bertekanan dan sisa isinya mudah terbakar.",
+    "tips": "Jangan dibakar atau ditusuk. Setor ke titik B3."
+  },
+  {
+    "nama": "Cat bekas",
+    "alias": [
+      "kaleng cat",
+      "thinner"
+    ],
+    "kelas": "b3",
+    "alasan": "Cat dan pelarut mengandung bahan kimia berbahaya.",
+    "tips": "Tutup rapat dan setor ke titik B3."
+  },
+  {
+    "nama": "Obat kedaluwarsa",
+    "alias": [
+      "obat bekas",
+      "obat rusak"
+    ],
+    "kelas": "b3",
+    "alasan": "Obat yang dibuang sembarangan dapat mencemari air.",
+    "tips": "Tanyakan apotek atau puskesmas tentang pengumpulan. Jangan dibuang ke saluran air."
+  },
+  {
+    "nama": "Termometer raksa",
+    "alias": [
+      "termometer merkuri"
+    ],
+    "kelas": "b3",
+    "alasan": "Raksa adalah logam cair beracun.",
+    "tips": "Jangan disentuh bila pecah. Hubungi petugas B3 setempat."
+  }
+]

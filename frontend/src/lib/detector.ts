@@ -1,146 +1,184 @@
-import * as ort from "onnxruntime-web/wasm";
-import { computeLetterbox, decodeOutput, nmsPerClass, type Detection } from "./postprocess.ts";
+import * as ort from "onnxruntime-web";
+import type { Ambang, AppConfig, Detection, HasilScan, Kelas } from "./types";
+import type { Sumber } from "./image";
 
-// Runtime WASM disajikan dari public/ort (disalin oleh scripts/sync-model.mjs).
-ort.env.wasm.wasmPaths = `${import.meta.env.BASE_URL}ort/`;
-// Satu thread: multi-thread butuh cross-origin isolation yang tidak ada di Firebase Hosting default.
-ort.env.wasm.numThreads = 1;
+// Hanya .wasm yang diarahkan ke /public. Loader .mjs memakai versi yang sudah tertanam di bundle
+// (mengimpor .mjs dari /public ditolak Vite dev server).
+ort.env.wasm.wasmPaths = { wasm: "/ort/ort-wasm-simd-threaded.jsep.wasm" } as unknown as typeof ort.env.wasm.wasmPaths;
+ort.env.wasm.numThreads = Math.min(4, navigator.hardwareConcurrency || 1);
 
-export interface DetectOptions {
-  minScore: number;
-  nmsIou: number;
-  maxDetections: number;
+const N_KELAS = 5;
+const N_KANDIDAT = 3549;
+
+export interface Detector {
+  detect(src: Sumber, sw: number, sh: number): Promise<Detection[]>;
 }
 
-export type ProgressFn = (loadedBytes: number, totalBytes: number) => void;
-
-export class Detector {
-  private session: ort.InferenceSession;
-  private inputName: string;
-  private outputName: string;
-  private size: number;
-  private numClasses: number;
-  private canvas: HTMLCanvasElement;
-  private ctx: CanvasRenderingContext2D;
-  private queue: Promise<unknown> = Promise.resolve();
-
-  private constructor(session: ort.InferenceSession, size: number, numClasses: number) {
-    this.session = session;
-    this.size = size;
-    this.numClasses = numClasses;
-    this.inputName = session.inputNames[0];
-    this.outputName = session.outputNames[0];
-    this.canvas = document.createElement("canvas");
-    this.canvas.width = size;
-    this.canvas.height = size;
-    const ctx = this.canvas.getContext("2d", { willReadFrequently: true });
-    if (!ctx) throw new Error("Canvas 2D tidak tersedia di browser ini");
-    this.ctx = ctx;
-  }
-
-  static async create(
-    modelUrl: string,
-    size: number,
-    numClasses: number,
-    onProgress?: ProgressFn,
-  ): Promise<Detector> {
-    const bytes = await fetchWithProgress(modelUrl, onProgress);
-    const session = await ort.InferenceSession.create(bytes, {
-      executionProviders: ["wasm"],
-      graphOptimizationLevel: "all",
-    });
-    const detector = new Detector(session, size, numClasses);
-    // Pemanasan: inferensi pertama biasanya jauh lebih lambat.
-    await detector.run(new Float32Array(3 * size * size));
-    return detector;
-  }
-
-  /** Jalankan deteksi pada frame video/canvas. Pemanggilan dijalankan berurutan. */
-  detect(source: CanvasImageSource, srcW: number, srcH: number, opts: DetectOptions): Promise<Detection[]> {
-    const job = this.queue.then(async () => {
-      const lb = computeLetterbox(srcW, srcH, this.size);
-      const input = this.preprocess(source, srcW, srcH, lb);
-      const { data, numCandidates } = await this.run(input);
-      const raw = decodeOutput(data, numCandidates, this.numClasses, opts.minScore, lb, srcW, srcH);
-      return nmsPerClass(raw, opts.nmsIou, opts.maxDetections);
-    });
-    this.queue = job.catch(() => undefined);
-    return job;
-  }
-
-  private preprocess(
-    source: CanvasImageSource,
-    srcW: number,
-    srcH: number,
-    lb: ReturnType<typeof computeLetterbox>,
-  ): Float32Array {
-    const { ctx, size } = this;
-    ctx.fillStyle = "rgb(114,114,114)";
-    ctx.fillRect(0, 0, size, size);
-    ctx.drawImage(source, 0, 0, srcW, srcH, lb.padX, lb.padY, lb.newW, lb.newH);
-    const rgba = ctx.getImageData(0, 0, size, size).data;
-    const plane = size * size;
-    const out = new Float32Array(3 * plane);
-    for (let i = 0; i < plane; i++) {
-      out[i] = rgba[i * 4] / 255;
-      out[plane + i] = rgba[i * 4 + 1] / 255;
-      out[2 * plane + i] = rgba[i * 4 + 2] / 255;
-    }
-    return out;
-  }
-
-  private async run(input: Float32Array): Promise<{ data: Float32Array; numCandidates: number }> {
-    const tensor = new ort.Tensor("float32", input, [1, 3, this.size, this.size]);
-    const results = await this.session.run({ [this.inputName]: tensor });
-    const out = results[this.outputName];
-    // Bentuk [1, 4 + C, N]
-    return { data: out.data as Float32Array, numCandidates: out.dims[2] };
-  }
-}
-
-async function fetchWithProgress(url: string, onProgress?: ProgressFn): Promise<Uint8Array> {
+/** Unduh model dengan progres (0..1, atau -1 bila ukuran tidak diketahui). */
+async function unduh(url: string, onProgress: (p: number) => void): Promise<Uint8Array> {
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`Gagal mengunduh model (${res.status})`);
-  const total = Number(res.headers.get("content-length")) || 0;
-  if (!res.body) {
-    const buf = new Uint8Array(await res.arrayBuffer());
-    onProgress?.(buf.length, buf.length);
-    return buf;
-  }
+  if (!res.ok) throw new Error(`Model gagal diunduh (${res.status})`);
+  const total = Number(res.headers.get("Content-Length")) || 0;
+  if (!res.body) return new Uint8Array(await res.arrayBuffer());
   const reader = res.body.getReader();
   const chunks: Uint8Array[] = [];
-  let loaded = 0;
+  let got = 0;
   for (;;) {
     const { done, value } = await reader.read();
     if (done) break;
     chunks.push(value);
-    loaded += value.length;
-    onProgress?.(loaded, total);
+    got += value.length;
+    onProgress(total ? Math.min(1, got / total) : -1);
   }
-  const bytes = new Uint8Array(loaded);
-  let offset = 0;
+  const out = new Uint8Array(got);
+  let o = 0;
   for (const c of chunks) {
-    bytes.set(c, offset);
-    offset += c.length;
+    out.set(c, o);
+    o += c.length;
   }
-  return bytes;
+  return out;
 }
 
-// Satu kali muat per sesi halaman (aman terhadap StrictMode); direset bila gagal agar bisa dicoba lagi.
-let loading: Promise<Detector> | null = null;
-let progressListener: ProgressFn | undefined;
-export function loadDetector(
-  modelUrl: string,
-  size: number,
-  numClasses: number,
-  onProgress?: ProgressFn,
-): Promise<Detector> {
-  progressListener = onProgress; // pemanggil terbaru yang menerima progres (mis. mount ulang StrictMode)
-  if (!loading) {
-    loading = Detector.create(modelUrl, size, numClasses, (l, t) => progressListener?.(l, t)).catch((e) => {
-      loading = null;
-      throw e;
-    });
+export async function muatDetector(cfg: AppConfig, onProgress: (p: number) => void): Promise<Detector> {
+  const buf = await unduh(cfg.model.url, onProgress);
+  let session: ort.InferenceSession;
+  let pakaiWebgpu = true;
+  try {
+    session = await ort.InferenceSession.create(buf, { executionProviders: ["webgpu", "wasm"] });
+  } catch {
+    pakaiWebgpu = false;
+    session = await ort.InferenceSession.create(buf, { executionProviders: ["wasm"] });
   }
-  return loading;
+
+  const S = cfg.model.ukuran;
+  const work = document.createElement("canvas");
+  work.width = S;
+  work.height = S;
+  const wctx = work.getContext("2d", { willReadFrequently: true })!;
+  const nms = cfg.ambang.nmsIou;
+  const floor = cfg.ambang.floor;
+  const namaKelas = cfg.kelas;
+
+  async function jalankan(src: Sumber, sw: number, sh: number): Promise<Detection[]> {
+    // 1. Letterbox: jaga rasio, isi sisa dengan abu-abu 114
+    const scale = Math.min(S / sw, S / sh);
+    const nw = Math.round(sw * scale);
+    const nh = Math.round(sh * scale);
+    const padX = Math.floor((S - nw) / 2);
+    const padY = Math.floor((S - nh) / 2);
+    wctx.fillStyle = "rgb(114,114,114)";
+    wctx.fillRect(0, 0, S, S);
+    wctx.drawImage(src as CanvasImageSource, 0, 0, sw, sh, padX, padY, nw, nh);
+    const px = wctx.getImageData(0, 0, S, S).data;
+
+    // 2. RGBA HWC -> RGB NCHW, 0..1
+    const plane = S * S;
+    const input = new Float32Array(3 * plane);
+    for (let i = 0; i < plane; i++) {
+      input[i] = px[i * 4] / 255;
+      input[plane + i] = px[i * 4 + 1] / 255;
+      input[2 * plane + i] = px[i * 4 + 2] / 255;
+    }
+
+    // 3. Inferensi
+    let out: ort.InferenceSession.OnnxValueMapType;
+    try {
+      out = await session.run({ images: new ort.Tensor("float32", input, [1, 3, S, S]) });
+    } catch (e) {
+      // WebGPU kadang gagal saat dijalankan (bukan saat dibuat): pindah ke WASM lalu ulangi sekali.
+      if (!pakaiWebgpu) throw e;
+      console.warn("WebGPU gagal, beralih ke WASM:", e);
+      pakaiWebgpu = false;
+      session = await ort.InferenceSession.create(buf, { executionProviders: ["wasm"] });
+      out = await session.run({ images: new ort.Tensor("float32", input, [1, 3, S, S]) });
+    }
+    const data = out["output0"].data as Float32Array; // [1, 4+5, 3549]
+
+    // 4. Dekode: kelas dengan skor tertinggi per kandidat
+    const cand: Detection[] = [];
+    for (let i = 0; i < N_KANDIDAT; i++) {
+      let best = -1;
+      let bestScore = 0;
+      for (let c = 0; c < N_KELAS; c++) {
+        const s = data[(4 + c) * N_KANDIDAT + i];
+        if (s > bestScore) {
+          bestScore = s;
+          best = c;
+        }
+      }
+      if (best < 0 || bestScore < floor) continue;
+      const cx = data[i];
+      const cy = data[N_KANDIDAT + i];
+      const w = data[2 * N_KANDIDAT + i];
+      const h = data[3 * N_KANDIDAT + i];
+      // 5. Kembalikan ke koordinat sumber
+      let x1 = (cx - w / 2 - padX) / scale;
+      let y1 = (cy - h / 2 - padY) / scale;
+      let x2 = (cx + w / 2 - padX) / scale;
+      let y2 = (cy + h / 2 - padY) / scale;
+      x1 = Math.max(0, Math.min(sw, x1));
+      y1 = Math.max(0, Math.min(sh, y1));
+      x2 = Math.max(0, Math.min(sw, x2));
+      y2 = Math.max(0, Math.min(sh, y2));
+      if (x2 - x1 < 2 || y2 - y1 < 2) continue;
+      cand.push({ cls: best, kelas: namaKelas[best], score: bestScore, x: x1, y: y1, w: x2 - x1, h: y2 - y1 });
+    }
+    return nmsPerKelas(cand, nms).slice(0, 20);
+  }
+
+  // Satu inferensi pada satu waktu: kanvas kerja dan sesi dipakai bersama oleh loop live,
+  // jepret, dan unggah, sehingga panggilan bersamaan harus diantrekan.
+  let antrean: Promise<unknown> = Promise.resolve();
+  function detect(src: Sumber, sw: number, sh: number): Promise<Detection[]> {
+    const p = antrean.then(() => jalankan(src, sw, sh));
+    antrean = p.catch(() => undefined);
+    return p;
+  }
+
+  return { detect };
+}
+
+function iou(a: Detection, b: Detection): number {
+  const x1 = Math.max(a.x, b.x);
+  const y1 = Math.max(a.y, b.y);
+  const x2 = Math.min(a.x + a.w, b.x + b.w);
+  const y2 = Math.min(a.y + a.h, b.y + b.h);
+  const inter = Math.max(0, x2 - x1) * Math.max(0, y2 - y1);
+  const uni = a.w * a.h + b.w * b.h - inter;
+  return uni > 0 ? inter / uni : 0;
+}
+
+function nmsPerKelas(dets: Detection[], thr: number): Detection[] {
+  const sorted = [...dets].sort((a, b) => b.score - a.score);
+  const keep: Detection[] = [];
+  for (const d of sorted) {
+    if (!keep.some((k) => k.cls === d.cls && iou(k, d) > thr)) keep.push(d);
+  }
+  return keep;
+}
+
+// ---- Ambang dan keputusan ----
+
+export function ambangKelas(a: Ambang, k: Kelas, jenis: "live" | "capture"): number {
+  return a.perKelas[k]?.[jenis] ?? a[jenis];
+}
+
+export function saringLive(dets: Detection[], a: Ambang): Detection[] {
+  return dets.filter((d) => d.score >= ambangKelas(a, d.kelas, "live"));
+}
+
+export interface Keputusan {
+  hasil: HasilScan;
+  deteksi: Detection[]; // hanya terisi saat hasil === "ok"
+}
+
+/** Logika keputusan setelah jepret atau unggah (PRD 7.4). */
+export function putuskan(dets: Detection[], a: Ambang): Keputusan {
+  const kandidat = dets.filter((d) => d.score >= a.floor);
+  if (kandidat.length === 0) return { hasil: "kosong", deteksi: [] };
+  const memadai = kandidat
+    .filter((d) => d.score >= ambangKelas(a, d.kelas, "capture"))
+    .sort((x, y) => y.score - x.score);
+  if (memadai.length === 0) return { hasil: "ragu", deteksi: [] };
+  return { hasil: "ok", deteksi: memadai };
 }

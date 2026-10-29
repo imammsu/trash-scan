@@ -4,4 +4,3 @@ frontend/public/model/
 frontend/.env
 .firebase/
 firebase-debug.log
-frontend/public/ort/

@@ -1,87 +1,125 @@
 {
-  "model": { "url": "model/sampah_yolo11n.onnx", "inputSize": 416 },
-  "classes": ["anorganik", "b3", "kertas", "organik", "residu"],
-  "thresholds": {
+  "versi": "0.2.0",
+  "kelas": ["anorganik", "b3", "kertas", "organik", "residu"],
+  "model": { "url": "/model/sampah_yolo11n.onnx", "ukuran": 416 },
+  "ambang": {
     "live": 0.5,
     "capture": 0.6,
     "floor": 0.25,
     "nmsIou": 0.45,
-    "maxDetections": 20,
-    "perClass": {}
+    "perKelas": {}
   },
-  "liveIntervalMs": 250,
-  "content": {
+  "peta": {
+    "pusat": [-2.5, 118],
+    "zoom": 5,
+    "catatan": "GANTI pusat dan zoom dengan area kampanye (mis. [lat, lng] dan 15)."
+  },
+  "kuis": {
+    "soalPerSesi": 6,
+    "postMinScan": 3,
+    "postMinHari": 1,
+    "versi": "bank-1"
+  },
+  "faktaMuat": [
+    "Sisa makanan adalah komponen terbesar sampah nasional, sekitar 40,76% (SIPSN KLHK 2025).",
+    "Memilah dari sumber membuat bahan daur ulang tetap bersih dan bernilai.",
+    "Baterai dan lampu bekas tidak boleh masuk tong sampah biasa karena mengandung bahan berbahaya."
+  ],
+  "kelasDetail": {
     "anorganik": {
       "nama": "Sampah Anorganik",
-      "tong": { "warna": "#d9a400", "namaWarna": "Kuning", "label": "Anorganik", "dikonfirmasi": false },
+      "tong": { "warna": "#E0A800", "label": "Tong anorganik (kuning)" },
+      "titikSetor": true,
       "panduan": [
-        "Kosongkan dan bilas wadah plastik, kaca, atau kaleng agar tidak berbau.",
-        "Pisahkan tutup botol dan label bila bisa.",
-        "Pipihkan botol atau kaleng agar hemat tempat.",
-        "Kumpulkan lalu setor ke bank sampah atau pengepul terdekat."
+        "Kosongkan isinya dan bilas singkat bila ada sisa makanan atau minuman.",
+        "Pisahkan tutup dan label bila mudah dilepas, lalu keringkan.",
+        "Masukkan ke tong anorganik atau setor ke bank sampah."
       ],
       "edukasi": {
-        "waktuTerurai": "Plastik butuh puluhan hingga ratusan tahun untuk terurai, kaca bisa jauh lebih lama.",
-        "dampak": "Plastik yang lepas ke lingkungan terpecah menjadi mikroplastik, mencemari sungai dan laut, lalu masuk ke rantai makanan.",
-        "sdg": ["SDG 11", "SDG 12"]
+        "apa": "Sampah anorganik adalah bahan yang sulit terurai alami, seperti plastik, kaca, dan logam.",
+        "kenapa": "Plastik dan logam yang kotor atau tercampur sisa makanan lebih sulit didaur ulang dan sering berakhir di TPA.",
+        "waktuTerurai": null,
+        "aksiKecil": "Bawa botol minum dan tas belanja sendiri hari ini.",
+        "kurangiDulu": "Kurangi dulu: tolak sedotan dan kantong plastik sekali pakai bila tidak perlu.",
+        "fakta": { "teks": "Plastik menyumbang sekitar 18,7% komposisi sampah nasional.", "sumber": "SIPSN KLHK, data 2022 (dilaporkan Republika)" },
+        "sdg": ["SDG 12", "SDG 4"]
       }
     },
     "b3": {
       "nama": "Sampah B3 (Bahan Berbahaya dan Beracun)",
-      "tong": { "warna": "#c62828", "namaWarna": "Merah", "label": "B3", "dikonfirmasi": false },
-      "peringatan": "Jangan dibuang ke tempat sampah biasa.",
+      "tong": { "warna": "#C62828", "label": "Jangan ke tong biasa. Serahkan ke titik pengumpulan B3 (merah)" },
+      "titikSetor": true,
+      "peringatan": "Jangan dibuang ke tempat sampah biasa. Jangan dibongkar, dibakar, atau ditekan hingga pecah.",
       "panduan": [
-        "Simpan terpisah di wadah kering dan tertutup, jauhkan dari anak-anak.",
-        "Jangan dibakar, dibongkar, atau dihancurkan.",
-        "Serahkan ke titik pengumpulan limbah B3 atau elektronik resmi di wilayahmu."
+        "Simpan terpisah dalam wadah tertutup, jauh dari anak-anak dan sumber panas.",
+        "Jangan dibongkar, dibakar, atau dibuang ke saluran air.",
+        "Serahkan ke titik pengumpulan B3 atau e-waste terdekat."
       ],
       "edukasi": {
-        "waktuTerurai": "Tidak mudah terurai, bahan berbahayanya dapat bertahan lama di lingkungan.",
-        "dampak": "Logam berat dan bahan kimia dapat meresap ke tanah dan air, lalu membahayakan kesehatan manusia dan makhluk hidup lain.",
-        "sdg": ["SDG 11", "SDG 12"]
+        "apa": "B3 adalah barang yang mengandung bahan berbahaya, seperti baterai, lampu neon, dan perangkat elektronik rusak.",
+        "kenapa": "Bahan berbahaya dapat mencemari tanah dan air tanah bila tercampur dengan sampah biasa, dan berisiko bagi petugas kebersihan.",
+        "waktuTerurai": null,
+        "aksiKecil": "Kumpulkan baterai bekas di satu wadah tertutup, lalu setor saat ada titik pengumpulan.",
+        "kurangiDulu": "Kurangi dulu: pilih baterai isi ulang dan perbaiki elektronik sebelum membeli baru.",
+        "fakta": null,
+        "sdg": ["SDG 12", "SDG 11"]
       }
     },
     "kertas": {
       "nama": "Sampah Kertas",
-      "tong": { "warna": "#1565c0", "namaWarna": "Biru", "label": "Kertas", "dikonfirmasi": false },
+      "tong": { "warna": "#1E63B5", "label": "Tong kertas (biru)" },
+      "titikSetor": true,
       "panduan": [
-        "Jaga tetap kering dan bersih, kertas basah atau berminyak sulit didaur ulang.",
-        "Lipat atau ikat kardus agar rapi.",
-        "Lepas selotip dan plastik pembungkus bila memungkinkan.",
-        "Setor ke bank sampah atau pengepul kertas."
+        "Jaga tetap kering dan bersih. Kertas basah atau berminyak tidak bisa didaur ulang.",
+        "Ratakan kardus dan lepaskan lakban bila memungkinkan.",
+        "Kumpulkan lalu setor ke bank sampah atau masukkan ke tong kertas."
       ],
       "edukasi": {
-        "waktuTerurai": "Kertas terurai dalam hitungan minggu hingga beberapa bulan, tergantung kondisi.",
-        "dampak": "Mendaur ulang kertas mengurangi penebangan pohon dan sampah yang menumpuk di TPA.",
-        "sdg": ["SDG 12", "SDG 13"]
+        "apa": "Sampah kertas mencakup kertas, koran, buku bekas, dan kardus yang bersih.",
+        "kenapa": "Kertas yang basah atau berminyak merusak proses daur ulang dan menurunkan nilai jualnya.",
+        "waktuTerurai": null,
+        "aksiKecil": "Pakai kedua sisi kertas sebelum dibuang.",
+        "kurangiDulu": "Kurangi dulu: pilih dokumen digital bila memungkinkan.",
+        "fakta": { "teks": "Kertas dan karton sekitar 10,7% komposisi sampah nasional.", "sumber": "SIPSN KLHK, data 2022 (dilaporkan Republika)" },
+        "sdg": ["SDG 12", "SDG 4"]
       }
     },
     "organik": {
       "nama": "Sampah Organik",
-      "tong": { "warna": "#2e7d32", "namaWarna": "Hijau", "label": "Organik", "dikonfirmasi": false },
+      "tong": { "warna": "#2E7D32", "label": "Tong organik (hijau)" },
+      "titikSetor": false,
       "panduan": [
-        "Pisahkan dari sampah anorganik.",
-        "Olah menjadi kompos bila memungkinkan.",
-        "Jika dibuang, tiriskan dulu dan bungkus agar tidak berceceran."
+        "Pisahkan dari plastik, kertas, dan kemasan.",
+        "Olah jadi kompos, masukkan ke lubang biopori, atau berikan ke komposter komunal.",
+        "Bila tidak bisa diolah, masukkan ke tong organik agar tidak membusuk bersama sampah lain."
       ],
       "edukasi": {
-        "waktuTerurai": "Sisa makanan dan daun terurai dalam hitungan minggu hingga beberapa bulan.",
-        "dampak": "Sampah organik yang menumpuk di TPA terurai tanpa oksigen dan menghasilkan metana, gas rumah kaca yang kuat.",
-        "sdg": ["SDG 11", "SDG 12", "SDG 13"]
+        "apa": "Sampah organik berasal dari makhluk hidup dan mudah terurai, seperti sisa makanan, daun, dan kulit buah.",
+        "kenapa": "Sisa makanan yang menumpuk di TPA membusuk tanpa udara dan menghasilkan metana, gas rumah kaca yang kuat.",
+        "waktuTerurai": null,
+        "aksiKecil": "Mulai kompos sederhana atau buat satu lubang biopori di halaman.",
+        "kurangiDulu": "Kurangi dulu: ambil makanan secukupnya dan habiskan sebelum membuang.",
+        "fakta": { "teks": "Sisa makanan sekitar 40,76% dari timbulan sampah nasional 25,14 juta ton.", "sumber": "SIPSN KLHK, data 2025 (dilaporkan GoodStats)" },
+        "sdg": ["SDG 12", "SDG 13"]
       }
     },
     "residu": {
       "nama": "Sampah Residu",
-      "tong": { "warna": "#546e7a", "namaWarna": "Abu-abu", "label": "Residu", "dikonfirmasi": false },
+      "tong": { "warna": "#5F6B6B", "label": "Tong residu (abu-abu)" },
+      "titikSetor": false,
       "panduan": [
-        "Bungkus rapat sebelum dibuang agar tidak berserakan.",
-        "Buang ke tempat sampah residu, jenis ini sulit didaur ulang.",
-        "Jangan dibakar, asapnya mencemari udara dan menambah emisi."
+        "Bungkus rapat agar tidak berceceran, terutama popok dan pembalut.",
+        "Masukkan ke tong residu untuk diangkut petugas.",
+        "Residu tidak disetor ke bank sampah."
       ],
       "edukasi": {
-        "waktuTerurai": "Sangat lama, misalnya puntung rokok dan styrofoam bertahan bertahun-tahun.",
-        "dampak": "Residu berakhir di TPA dan sebagian lepas ke lingkungan. Mengurangi barang sekali pakai adalah cara terbaik menguranginya.",
-        "sdg": ["SDG 11", "SDG 12", "SDG 13"]
+        "apa": "Residu adalah sampah yang sulit didaur ulang atau diolah, seperti puntung rokok, popok, dan styrofoam kotor.",
+        "kenapa": "Residu yang tercampur membuat bahan daur ulang kotor, jadi pisahkan agar yang bisa diolah tetap bersih.",
+        "waktuTerurai": null,
+        "aksiKecil": "Pilih produk yang bisa dipakai ulang untuk mengurangi residu, misalnya wadah makan sendiri.",
+        "kurangiDulu": "Kurangi dulu: hindari kemasan sachet dan styrofoam sekali pakai.",
+        "fakta": null,
+        "sdg": ["SDG 12", "SDG 11"]
       }
     }
   }

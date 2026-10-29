@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+
+    function isAdmin() {
+      return signedIn() &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // Dikelola lewat konsol Firebase saja.
+    match /admins/{uid} {
+      allow read, write: if false;
+    }
+
+    // Pembatasan laju: diperbarui dalam batch yang sama dengan feedback.
+    match /users/{uid} {
+      allow create, update: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['lastAt', 'count'])
+        && request.resource.data.lastAt == request.time
+        && request.resource.data.count is int
+        && request.resource.data.count <= 30
+        && (resource == null
+              ? request.resource.data.count == 1
+              : (request.resource.data.count == resource.data.count + 1
+                 && request.time > resource.data.lastAt + duration.value(15, 's')));
+      allow read, delete: if false;
+    }
+
+    match /feedback/{id} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['uid', 'predicted', 'correct', 'box', 'imageB64', 'createdAt'])
+        && request.resource.data.keys().hasAll(['uid', 'predicted', 'correct', 'imageB64', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.predicted in ['anorganik', 'b3', 'kertas', 'organik', 'residu']
+        && request.resource.data.correct in ['anorganik', 'b3', 'kertas', 'organik', 'residu', 'bukan_sampah']
+        && request.resource.data.predicted != request.resource.data.correct
+        && request.resource.data.imageB64 is string
+        && request.resource.data.imageB64.size() < 900000
+        && (!('box' in request.resource.data) || (request.resource.data.box is list && request.resource.data.box.size() == 4))
+        && request.resource.data.createdAt == request.time
+        // wajib bersamaan dengan pembaruan users/{uid} (pembatasan laju)
+        && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.lastAt == request.time;
+      allow read, update: if isAdmin();
+      allow delete: if false;
+    }
+
+    // Hasil kuis: satu pre dan satu post per akun anonim, hanya create.
+    match /quiz/{id} {
+      allow create: if signedIn()
+        && request.resource.data.tipe in ['pre', 'post']
+        && id == request.auth.uid + '_' + request.resource.data.tipe
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['uid', 'tipe', 'skor', 'total', 'jawaban', 'versi', 'createdAt'])
+        && request.resource.data.skor is int && request.resource.data.total is int
+        && request.resource.data.skor >= 0 && request.resource.data.skor <= request.resource.data.total
+        && request.resource.data.total <= 20
+        && request.resource.data.jawaban is list
+        && request.resource.data.versi is string
+        && request.resource.data.createdAt == request.time;
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+  }
+}
