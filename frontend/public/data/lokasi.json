@@ -1,0 +1,41 @@
+[
+  {
+    "id": "demo-bs-001",
+    "nama": "CONTOH — Bank Sampah TrashScan",
+    "jenis": "bank_sampah",
+    "menerima": ["anorganik", "kertas"],
+    "lat": -6.200000,
+    "lng": 106.816666,
+    "alamat": "DATA DEMO — ganti dengan alamat mitra terverifikasi",
+    "jam": "Senin–Jumat, 08.00–16.00 (contoh)",
+    "kontak": "Kontak mitra belum diisi",
+    "diperbarui": "2026-10-30 (DEMO)",
+    "statusData": "demo"
+  },
+  {
+    "id": "demo-b3-001",
+    "nama": "CONTOH — Titik Pengumpulan B3",
+    "jenis": "b3",
+    "menerima": ["b3"],
+    "lat": -6.175000,
+    "lng": 106.827000,
+    "alamat": "DATA DEMO — ganti dengan titik B3 terverifikasi",
+    "jam": "Jam layanan belum diverifikasi",
+    "kontak": "Kontak mitra belum diisi",
+    "diperbarui": "2026-10-30 (DEMO)",
+    "statusData": "demo"
+  },
+  {
+    "id": "demo-kompos-001",
+    "nama": "CONTOH — Komposter Komunal",
+    "jenis": "kompos",
+    "menerima": ["organik"],
+    "lat": -6.210000,
+    "lng": 106.820000,
+    "alamat": "DATA DEMO — ganti dengan alamat komposter terverifikasi",
+    "jam": "Jam layanan belum diverifikasi",
+    "kontak": "Kontak mitra belum diisi",
+    "diperbarui": "2026-10-30 (DEMO)",
+    "statusData": "demo"
+  }
+]

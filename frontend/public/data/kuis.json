@@ -1,0 +1,209 @@
+{
+  "versi": "bank-1",
+  "soal": [
+    {
+      "id": "a1",
+      "set": "A",
+      "tanya": "Baterai bekas remote TV masuk kategori apa?",
+      "opsi": [
+        "Organik",
+        "Residu",
+        "B3",
+        "Kertas"
+      ],
+      "benar": 2,
+      "penjelasan": "Baterai mengandung logam berat dan bahan kimia. Setor ke titik pengumpulan B3."
+    },
+    {
+      "id": "a2",
+      "set": "A",
+      "tanya": "Kulit pisang sebaiknya dibuang ke mana?",
+      "opsi": [
+        "Tong organik atau kompos",
+        "Tong B3",
+        "Tong kertas",
+        "Selokan"
+      ],
+      "benar": 0,
+      "penjelasan": "Kulit pisang mudah terurai dan cocok untuk kompos."
+    },
+    {
+      "id": "a3",
+      "set": "A",
+      "tanya": "Apa yang sebaiknya dilakukan pada botol plastik bekas sebelum disetor?",
+      "opsi": [
+        "Dibakar",
+        "Dikosongkan dan dibilas singkat",
+        "Dicampur dengan sisa makanan",
+        "Diisi tanah"
+      ],
+      "benar": 1,
+      "penjelasan": "Botol yang kosong dan bersih lebih mudah didaur ulang."
+    },
+    {
+      "id": "a4",
+      "set": "A",
+      "tanya": "Kotak pizza yang sebagian berminyak sebaiknya diapakan?",
+      "opsi": [
+        "Semua masuk tong kertas",
+        "Bagian bersih ke kertas, bagian berminyak ke residu",
+        "Semua dibakar",
+        "Masuk tong B3"
+      ],
+      "benar": 1,
+      "penjelasan": "Minyak merusak daur ulang kertas, jadi pisahkan bagian yang berminyak."
+    },
+    {
+      "id": "a5",
+      "set": "A",
+      "tanya": "Struk belanja dari kasir sebaiknya masuk kategori apa?",
+      "opsi": [
+        "Kertas daur ulang",
+        "Residu",
+        "Organik",
+        "B3"
+      ],
+      "benar": 1,
+      "penjelasan": "Kertas struk adalah kertas termal berlapis kimia sehingga tidak ideal didaur ulang."
+    },
+    {
+      "id": "a6",
+      "set": "A",
+      "tanya": "Puntung rokok masuk kategori apa?",
+      "opsi": [
+        "Organik",
+        "Anorganik daur ulang",
+        "Residu",
+        "Kertas"
+      ],
+      "benar": 2,
+      "penjelasan": "Filter rokok mengandung plastik dan sulit diolah, jadi masuk residu."
+    },
+    {
+      "id": "a7",
+      "set": "A",
+      "tanya": "Benar atau mitos: semua sampah boleh dicampur karena nanti dipilah di TPA.",
+      "opsi": [
+        "Fakta",
+        "Mitos"
+      ],
+      "benar": 1,
+      "penjelasan": "Sampah basah mengotori bahan daur ulang. Pemilahan paling efektif dilakukan dari sumber."
+    },
+    {
+      "id": "a8",
+      "set": "A",
+      "tanya": "Apa pengolahan terbaik untuk sisa sayur di rumah?",
+      "opsi": [
+        "Dibuang ke sungai",
+        "Dikompos atau dimasukkan ke biopori",
+        "Dibakar bersama plastik",
+        "Dicampur dengan baterai"
+      ],
+      "benar": 1,
+      "penjelasan": "Kompos dan biopori mengembalikan sisa organik ke tanah."
+    },
+    {
+      "id": "b1",
+      "set": "B",
+      "tanya": "Lampu neon (TL) bekas masuk kategori apa?",
+      "opsi": [
+        "Anorganik biasa",
+        "Organik",
+        "B3",
+        "Kertas"
+      ],
+      "benar": 2,
+      "penjelasan": "Lampu neon mengandung merkuri dan harus diserahkan ke titik pengumpulan B3."
+    },
+    {
+      "id": "b2",
+      "set": "B",
+      "tanya": "Ampas kopi sebaiknya dibuang ke mana?",
+      "opsi": [
+        "Tong kertas",
+        "Tong organik atau kompos",
+        "Tong B3",
+        "Dicampur dengan kaca"
+      ],
+      "benar": 1,
+      "penjelasan": "Ampas kopi terurai alami dan baik untuk kompos."
+    },
+    {
+      "id": "b3",
+      "set": "B",
+      "tanya": "Kaleng minuman bekas sebaiknya diperlakukan bagaimana?",
+      "opsi": [
+        "Dikosongkan lalu disetor sebagai anorganik",
+        "Dibakar",
+        "Dimasukkan ke komposter",
+        "Dibuang ke B3"
+      ],
+      "benar": 0,
+      "penjelasan": "Logam seperti aluminium bernilai tinggi untuk didaur ulang."
+    },
+    {
+      "id": "b4",
+      "set": "B",
+      "tanya": "Kertas pembungkus gorengan yang berminyak masuk kategori apa?",
+      "opsi": [
+        "Kertas daur ulang",
+        "Residu",
+        "B3",
+        "Organik murni"
+      ],
+      "benar": 1,
+      "penjelasan": "Kertas berminyak tidak cocok didaur ulang."
+    },
+    {
+      "id": "b5",
+      "set": "B",
+      "tanya": "Tisu bekas pakai masuk kategori apa?",
+      "opsi": [
+        "Kertas daur ulang",
+        "Residu",
+        "B3",
+        "Anorganik daur ulang"
+      ],
+      "benar": 1,
+      "penjelasan": "Tisu bekas tidak didaur ulang, jadi masuk residu."
+    },
+    {
+      "id": "b6",
+      "set": "B",
+      "tanya": "Popok sekali pakai masuk kategori apa?",
+      "opsi": [
+        "Organik",
+        "Residu",
+        "Kertas",
+        "B3"
+      ],
+      "benar": 1,
+      "penjelasan": "Popok tercampur kotoran dan bahan sintetis, jadi masuk residu. Bungkus rapat sebelum dibuang."
+    },
+    {
+      "id": "b7",
+      "set": "B",
+      "tanya": "Benar atau mitos: kemasan plastik yang bersih dan kering lebih mudah diterima bank sampah.",
+      "opsi": [
+        "Fakta",
+        "Mitos"
+      ],
+      "benar": 0,
+      "penjelasan": "Bahan yang bersih lebih mudah didaur ulang dan bernilai lebih."
+    },
+    {
+      "id": "b8",
+      "set": "B",
+      "tanya": "Cara paling efektif mengurangi sampah plastik sekali pakai?",
+      "opsi": [
+        "Membakar plastik",
+        "Membawa botol minum dan tas belanja sendiri",
+        "Membuang ke sungai",
+        "Mengubur sembarang"
+      ],
+      "benar": 1,
+      "penjelasan": "Mengurangi dari awal lebih baik daripada mengolah setelah jadi sampah."
+    }
+  ]
+}
