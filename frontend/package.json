@@ -9,7 +9,8 @@
     "predev": "node scripts/sync-model.mjs",
     "prebuild": "node scripts/sync-model.mjs",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --experimental-strip-types --test tests/postprocess.test.ts"
   },
   "dependencies": {
     "firebase": "^13.1.0",

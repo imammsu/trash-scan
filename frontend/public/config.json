@@ -1,0 +1,88 @@
+{
+  "model": { "url": "model/sampah_yolo11n.onnx", "inputSize": 416 },
+  "classes": ["anorganik", "b3", "kertas", "organik", "residu"],
+  "thresholds": {
+    "live": 0.5,
+    "capture": 0.6,
+    "floor": 0.25,
+    "nmsIou": 0.45,
+    "maxDetections": 20,
+    "perClass": {}
+  },
+  "liveIntervalMs": 250,
+  "content": {
+    "anorganik": {
+      "nama": "Sampah Anorganik",
+      "tong": { "warna": "#d9a400", "namaWarna": "Kuning", "label": "Anorganik", "dikonfirmasi": false },
+      "panduan": [
+        "Kosongkan dan bilas wadah plastik, kaca, atau kaleng agar tidak berbau.",
+        "Pisahkan tutup botol dan label bila bisa.",
+        "Pipihkan botol atau kaleng agar hemat tempat.",
+        "Kumpulkan lalu setor ke bank sampah atau pengepul terdekat."
+      ],
+      "edukasi": {
+        "waktuTerurai": "Plastik butuh puluhan hingga ratusan tahun untuk terurai, kaca bisa jauh lebih lama.",
+        "dampak": "Plastik yang lepas ke lingkungan terpecah menjadi mikroplastik, mencemari sungai dan laut, lalu masuk ke rantai makanan.",
+        "sdg": ["SDG 11", "SDG 12"]
+      }
+    },
+    "b3": {
+      "nama": "Sampah B3 (Bahan Berbahaya dan Beracun)",
+      "tong": { "warna": "#c62828", "namaWarna": "Merah", "label": "B3", "dikonfirmasi": false },
+      "peringatan": "Jangan dibuang ke tempat sampah biasa.",
+      "panduan": [
+        "Simpan terpisah di wadah kering dan tertutup, jauhkan dari anak-anak.",
+        "Jangan dibakar, dibongkar, atau dihancurkan.",
+        "Serahkan ke titik pengumpulan limbah B3 atau elektronik resmi di wilayahmu."
+      ],
+      "edukasi": {
+        "waktuTerurai": "Tidak mudah terurai, bahan berbahayanya dapat bertahan lama di lingkungan.",
+        "dampak": "Logam berat dan bahan kimia dapat meresap ke tanah dan air, lalu membahayakan kesehatan manusia dan makhluk hidup lain.",
+        "sdg": ["SDG 11", "SDG 12"]
+      }
+    },
+    "kertas": {
+      "nama": "Sampah Kertas",
+      "tong": { "warna": "#1565c0", "namaWarna": "Biru", "label": "Kertas", "dikonfirmasi": false },
+      "panduan": [
+        "Jaga tetap kering dan bersih, kertas basah atau berminyak sulit didaur ulang.",
+        "Lipat atau ikat kardus agar rapi.",
+        "Lepas selotip dan plastik pembungkus bila memungkinkan.",
+        "Setor ke bank sampah atau pengepul kertas."
+      ],
+      "edukasi": {
+        "waktuTerurai": "Kertas terurai dalam hitungan minggu hingga beberapa bulan, tergantung kondisi.",
+        "dampak": "Mendaur ulang kertas mengurangi penebangan pohon dan sampah yang menumpuk di TPA.",
+        "sdg": ["SDG 12", "SDG 13"]
+      }
+    },
+    "organik": {
+      "nama": "Sampah Organik",
+      "tong": { "warna": "#2e7d32", "namaWarna": "Hijau", "label": "Organik", "dikonfirmasi": false },
+      "panduan": [
+        "Pisahkan dari sampah anorganik.",
+        "Olah menjadi kompos bila memungkinkan.",
+        "Jika dibuang, tiriskan dulu dan bungkus agar tidak berceceran."
+      ],
+      "edukasi": {
+        "waktuTerurai": "Sisa makanan dan daun terurai dalam hitungan minggu hingga beberapa bulan.",
+        "dampak": "Sampah organik yang menumpuk di TPA terurai tanpa oksigen dan menghasilkan metana, gas rumah kaca yang kuat.",
+        "sdg": ["SDG 11", "SDG 12", "SDG 13"]
+      }
+    },
+    "residu": {
+      "nama": "Sampah Residu",
+      "tong": { "warna": "#546e7a", "namaWarna": "Abu-abu", "label": "Residu", "dikonfirmasi": false },
+      "panduan": [
+        "Bungkus rapat sebelum dibuang agar tidak berserakan.",
+        "Buang ke tempat sampah residu, jenis ini sulit didaur ulang.",
+        "Jangan dibakar, asapnya mencemari udara dan menambah emisi."
+      ],
+      "edukasi": {
+        "waktuTerurai": "Sangat lama, misalnya puntung rokok dan styrofoam bertahan bertahun-tahun.",
+        "dampak": "Residu berakhir di TPA dan sebagian lepas ke lingkungan. Mengurangi barang sekali pakai adalah cara terbaik menguranginya.",
+        "sdg": ["SDG 11", "SDG 12", "SDG 13"]
+      }
+    }
+  }
+}
