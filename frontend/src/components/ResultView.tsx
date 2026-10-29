@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { AppConfig, Detection, HasilScan, Kelas } from "../lib/types";
 import { feedbackTerkirim } from "../lib/state";
+import { IKON_KELAS, namaPendek, varKelas } from "../lib/kelasUi";
 import FeedbackSheet from "./FeedbackSheet";
+import Icon from "./Icon";
 
 export interface HasilTampil {
   id: string;
@@ -38,7 +40,15 @@ export default function ResultView({ cfg, data, onUlang, onCariSetor }: Props) {
   const ratio = `${canvas.width} / ${canvas.height}`;
 
   return (
-    <div className="hasil">
+    <div className="stack">
+      <div className="hasil-top">
+        <h2>Hasil Pemindaian</h2>
+        <button className="btn tonal kecil" onClick={onUlang}>
+          <Icon name="replay" size={18} />
+          <span>Scan lagi</span>
+        </button>
+      </div>
+
       <div className="foto" style={{ aspectRatio: ratio }}>
         <img src={gambar} alt="Foto yang dipindai" className={hasil === "ok" ? "" : "redup"} />
         {hasil === "ok" &&
@@ -51,29 +61,47 @@ export default function ResultView({ cfg, data, onUlang, onCariSetor }: Props) {
                 top: `${(d.y / canvas.height) * 100}%`,
                 width: `${(d.w / canvas.width) * 100}%`,
                 height: `${(d.h / canvas.height) * 100}%`,
-                borderColor: cfg.kelasDetail[d.kelas].tong.warna,
+                ...varKelas(cfg, d.kelas),
               }}
               onClick={() => setTerpilih(d.kelas)}
               aria-label={`Sorot kartu ${cfg.kelasDetail[d.kelas].nama}`}
             >
-              <span style={{ background: cfg.kelasDetail[d.kelas].tong.warna }}>{cfg.kelasDetail[d.kelas].nama.replace("Sampah ", "")}</span>
+              <span>
+                <Icon name={IKON_KELAS[d.kelas]} size={13} />
+                <span>{namaPendek(cfg, d.kelas)}</span>
+              </span>
             </button>
           ))}
       </div>
 
+      {hasil === "ok" && grup.length > 1 && (
+        <p className="hint">
+          <Icon name="touch_app" size={16} />
+          <span>Ketuk kotak pada foto untuk menyorot kartu panduannya.</span>
+        </p>
+      )}
+
       {hasil === "kosong" && (
-        <section className="pesan">
+        <section className="card state-card">
+          <div className="badge-ikon"><Icon name="search_off" size={28} /></div>
           <h2>Tidak ada sampah terdeteksi</h2>
           <p>Dekatkan benda ke kamera, pastikan cahaya cukup, lalu coba lagi.</p>
-          <button className="btn" onClick={onUlang}>Scan lagi</button>
+          <button className="btn" onClick={onUlang}>
+            <Icon name="center_focus_strong" />
+            <span>Scan lagi</span>
+          </button>
         </section>
       )}
 
       {hasil === "ragu" && (
-        <section className="pesan">
+        <section className="card state-card warn">
+          <div className="badge-ikon"><Icon name="help" size={28} /></div>
           <h2>Tidak yakin, coba dari sudut lain</h2>
           <p>Model belum cukup yakin, jadi panduan tidak ditampilkan agar tidak keliru. Coba dekatkan, ganti sudut, atau cari namanya di Kamus.</p>
-          <button className="btn" onClick={onUlang}>Scan lagi</button>
+          <button className="btn" onClick={onUlang}>
+            <Icon name="center_focus_strong" />
+            <span>Scan lagi</span>
+          </button>
         </section>
       )}
 
@@ -90,34 +118,79 @@ export default function ResultView({ cfg, data, onUlang, onCariSetor }: Props) {
               ref={(el) => {
                 kartuRef.current[k] = el;
               }}
-              className={"kartu" + (terpilih === k ? " aktif" : "")}
-              style={{ borderLeftColor: det.tong.warna }}
+              className={"card lega kartu" + (terpilih === k ? " aktif" : "")}
+              style={varKelas(cfg, k)}
             >
-              <header>
-                <h3>{det.nama}</h3>
-                <p className="tong">{det.tong.label}{ds.length > 1 ? `, ${ds.length} objek` : ""}</p>
+              <header className="kartu-head">
+                <div className="badge-ikon kelas">
+                  <Icon name={IKON_KELAS[k]} size={22} />
+                </div>
+                <div className="stack-sm">
+                  <h3>{det.nama}</h3>
+                  <p className="tong">
+                    <i aria-hidden="true" />
+                    <span>{det.tong.label}{ds.length > 1 ? ` • ${ds.length} objek` : ""}</span>
+                  </p>
+                </div>
               </header>
-              {det.peringatan && <p className="peringatan" role="alert"><strong>Peringatan.</strong> {det.peringatan}</p>}
-              <h4>Cara membuang</h4>
-              <ol>{det.panduan.map((p, i) => <li key={i}>{p}</li>)}</ol>
-              <h4>Kenapa penting</h4>
-              <p>{e.apa} {e.kenapa}</p>
-              {e.waktuTerurai && <p><strong>Waktu terurai:</strong> {e.waktuTerurai}</p>}
-              {e.fakta && <p className="fakta">{e.fakta.teks} <span className="muted">Sumber: {e.fakta.sumber}.</span></p>}
-              <div className="aksi-kecil">
-                <strong>Aksi kecil:</strong> {e.aksiKecil}
-                <br />
-                <span>{e.kurangiDulu}</span>
+
+              {det.peringatan && (
+                <div className="peringatan" role="alert">
+                  <Icon name="warning" size={20} />
+                  <p><strong>Peringatan.</strong> {det.peringatan}</p>
+                </div>
+              )}
+
+              <div className="sub">
+                <h4><Icon name="checklist" size={16} />Cara membuang</h4>
+                <ol className="langkah">
+                  {det.panduan.map((p, i) => <li key={i}>{p}</li>)}
+                </ol>
               </div>
-              <p className="sdg">{e.sdg.join(", ")}</p>
+
+              <div className="sub stack-sm">
+                <h4><Icon name="school" size={16} />Kenapa penting</h4>
+                <p>{e.apa} {e.kenapa}</p>
+                {e.waktuTerurai && (
+                  <p className="label">
+                    <Icon name="schedule" size={15} /> Waktu terurai: {e.waktuTerurai}
+                  </p>
+                )}
+                {e.fakta && (
+                  <p className="fakta">
+                    {e.fakta.teks} <span className="muted">Sumber: {e.fakta.sumber}.</span>
+                  </p>
+                )}
+              </div>
+
+              <div className="aksi-kecil">
+                <Icon name="eco" size={20} />
+                <div>
+                  <strong>Aksi kecil</strong>
+                  <p>{e.aksiKecil} {e.kurangiDulu}</p>
+                </div>
+              </div>
+
+              <div className="sdg-row" aria-label="Keterkaitan SDGs">
+                {e.sdg.map((s) => (
+                  <span key={s} className="sdg-pil">{s}</span>
+                ))}
+              </div>
+
               <div className="row wrap">
-                {det.titikSetor && <button className="btn" onClick={() => onCariSetor(k)}>Cari tempat setor</button>}
+                {det.titikSetor && (
+                  <button className="btn" onClick={() => onCariSetor(k)}>
+                    <Icon name="pin_drop" size={18} />
+                    <span>Cari tempat setor</span>
+                  </button>
+                )}
                 <button
                   className="btn ghost"
                   disabled={sudah}
                   onClick={() => setFb(k)}
                 >
-                  {sudah ? "Koreksi terkirim" : "Klasifikasi salah?"}
+                  <Icon name={sudah ? "check_circle" : "flag"} size={18} />
+                  <span>{sudah ? "Koreksi terkirim" : "Klasifikasi salah?"}</span>
                 </button>
               </div>
             </article>
@@ -127,9 +200,13 @@ export default function ResultView({ cfg, data, onUlang, onCariSetor }: Props) {
       {hasil === "ok" && (
         <>
           <p className="catatan">
-            Model bisa keliru. Untuk B3 dan benda yang meragukan, cek pedoman resmi atau tanya petugas bank sampah setempat.
+            <Icon name="info" size={16} />
+            <span>Model bisa keliru. Untuk B3 dan benda yang meragukan, cek pedoman resmi atau tanya petugas bank sampah setempat.</span>
           </p>
-          <button className="btn besar" onClick={onUlang}>Scan lagi</button>
+          <button className="btn besar penuh" onClick={onUlang}>
+            <Icon name="center_focus_strong" size={22} />
+            <span>Scan lagi</span>
+          </button>
         </>
       )}
 
@@ -151,14 +228,32 @@ export default function ResultView({ cfg, data, onUlang, onCariSetor }: Props) {
 function Ringkasan({ cfg, grup, total }: { cfg: AppConfig; grup: [Kelas, Detection[]][]; total: number }) {
   const dominan = [...grup].sort((a, b) => b[1].length - a[1].length || b[1][0].score - a[1][0].score)[0][0];
   const det = cfg.kelasDetail[dominan];
-  const rincian = grup.map(([k, ds]) => `${ds.length} ${k === "b3" ? "B3" : k}`).join(", ");
   return (
-    <section className="ringkasan" style={{ borderTopColor: det.tong.warna }}>
-      <p className="muted">{total} objek terdeteksi: {rincian}</p>
+    <section className="card lega ringkasan" style={varKelas(cfg, dominan)}>
+      <div className="row wrap" style={{ justifyContent: "space-between" }}>
+        <span className="label muted">{total} objek terdeteksi</span>
+        <div className="chips">
+          {grup.map(([k, ds]) => (
+            <span key={k} className="pil-kelas" style={varKelas(cfg, k)}>
+              <Icon name={IKON_KELAS[k]} size={15} />
+              <span>{ds.length}× {namaPendek(cfg, k)}</span>
+            </span>
+          ))}
+        </div>
+      </div>
       <h2>{det.nama}</h2>
-      <p className="tong">{det.tong.label}</p>
+      <p className="tong">
+        <i aria-hidden="true" />
+        <span>{det.tong.label}</span>
+      </p>
       <p>{det.panduan[0]}</p>
-      <p><strong>Aksi kecil:</strong> {det.edukasi.aksiKecil}</p>
+      <div className="aksi-kecil">
+        <Icon name="tips_and_updates" size={20} />
+        <div>
+          <strong>Aksi kecil</strong>
+          <p>{det.edukasi.aksiKecil}</p>
+        </div>
+      </div>
     </section>
   );
 }

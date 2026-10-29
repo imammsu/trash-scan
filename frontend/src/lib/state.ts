@@ -39,12 +39,15 @@ export const tandaiNotice = () => set("ts_notice", "1");
 
 export type TipeKuis = "pre" | "post";
 export const kuisSelesai = (t: TipeKuis) => get(`ts_${t}`) !== null;
-export const tandaiKuisSelesai = (t: TipeKuis, skor: number, total: number) =>
-  set(`ts_${t}`, JSON.stringify({ skor, total, at: Date.now() }));
-export const infoKuis = (t: TipeKuis): { skor: number; total: number; at: number } | null => {
+export type SumberKuis = "server" | "lokal";
+export const tandaiKuisSelesai = (t: TipeKuis, skor: number, total: number, sumber: SumberKuis = "lokal") =>
+  set(`ts_${t}`, JSON.stringify({ skor, total, at: Date.now(), sumber }));
+export const infoKuis = (t: TipeKuis): { skor: number; total: number; at: number; sumber: SumberKuis } | null => {
   const v = get(`ts_${t}`);
   try {
-    return v ? JSON.parse(v) : null;
+    if (!v) return null;
+    const parsed = JSON.parse(v) as { skor: number; total: number; at: number; sumber?: SumberKuis };
+    return { ...parsed, sumber: parsed.sumber ?? "lokal" };
   } catch {
     return null;
   }

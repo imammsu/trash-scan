@@ -1,13 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Circle, CircleMarker, MapContainer, Popup, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import Icon from "../components/Icon";
 import { loadLokasi } from "../lib/content";
 import { formatJarak, jarakMeter, linkRute } from "../lib/geo";
 import { track } from "../lib/analytics";
+import { namaPendek, varKelas } from "../lib/kelasUi";
 import type { AppConfig, Kelas, Lokasi } from "../lib/types";
 
 const WARNA_JENIS: Record<Lokasi["jenis"], string> = { bank_sampah: "#0F766E", b3: "#C62828", kompos: "#2E7D32" };
 const NAMA_JENIS: Record<Lokasi["jenis"], string> = { bank_sampah: "Bank sampah", b3: "Titik B3", kompos: "Komposter" };
+const IKON_JENIS: Record<Lokasi["jenis"], string> = { bank_sampah: "recycling", b3: "warning", kompos: "compost" };
 
 interface Pos { lat: number; lng: number; akurasi: number }
 
@@ -87,19 +90,51 @@ export default function LokasiScreen({ cfg, filterAwal }: { cfg: AppConfig; filt
   }, [data, filter, pos]);
 
   const kelasPunyaTitik = cfg.kelas.filter((k) => cfg.kelasDetail[k].titikSetor);
+  const memakaiDataDemo = Boolean(data?.some((l) => l.statusData === "demo"));
 
-  if (err) return <div className="pesan"><h2>Data lokasi gagal dimuat</h2><p>{err}</p></div>;
+  if (err) {
+    return (
+      <div className="card state-card err">
+        <div className="badge-ikon"><Icon name="error" size={28} /></div>
+        <h2>Data lokasi gagal dimuat</h2>
+        <p>{err}</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="lokasi">
-      <h2>Tempat setor</h2>
+    <div className="stack">
+      <div className="judul-layar">
+        <h2>Tempat setor</h2>
+        <p className="muted">Temukan mitra bank sampah, komposter, dan titik B3 terdekat.</p>
+      </div>
+
+      {memakaiDataDemo && (
+        <div className="alert info" role="note">
+          <Icon name="science" size={20} />
+          <span>Titik yang tampil masih <strong>data demo</strong>, bukan lokasi layanan terverifikasi. Ganti dengan data mitra sebelum aplikasi dipublikasikan.</span>
+        </div>
+      )}
+
       <div className="chips" role="group" aria-label="Filter kelas">
-        <button className={"chip" + (!filter ? " on" : "")} aria-pressed={!filter} onClick={() => setFilter(null)}>Semua</button>
-        {kelasPunyaTitik.map((k) => (
-          <button key={k} className={"chip" + (filter === k ? " on" : "")} aria-pressed={filter === k} onClick={() => setFilter(k)}>
-            {cfg.kelasDetail[k].nama.replace("Sampah ", "")}
-          </button>
-        ))}
+        <button className={"chip" + (!filter ? " on" : "")} aria-pressed={!filter} onClick={() => setFilter(null)}>
+          Semua
+        </button>
+        {kelasPunyaTitik.map((k) => {
+          const on = filter === k;
+          return (
+            <button
+              key={k}
+              className={"chip kelas" + (on ? " on" : "")}
+              style={varKelas(cfg, k)}
+              aria-pressed={on}
+              onClick={() => setFilter(on ? null : k)}
+            >
+              <span className="titik" aria-hidden="true" />
+              <span>{namaPendek(cfg, k)}</span>
+            </button>
+          );
+        })}
       </div>
 
       <div className="peta">
@@ -128,14 +163,29 @@ export default function LokasiScreen({ cfg, filterAwal }: { cfg: AppConfig; filt
             </>
           )}
         </MapContainer>
+        <button className="btn ghost kecil peta-fab" onClick={lokasiku}>
+          <Icon name="my_location" size={18} />Ke lokasiku
+        </button>
       </div>
 
-      <div className="row wrap">
-        <button className="btn ghost kecil" onClick={lokasiku}>Ke lokasiku</button>
-        <span className="legenda"><i style={{ background: WARNA_JENIS.bank_sampah }} />Bank sampah <i style={{ background: WARNA_JENIS.b3 }} />B3 <i style={{ background: WARNA_JENIS.kompos }} />Kompos</span>
+      <div className="legenda" aria-label="Keterangan warna titik peta">
+        <span><i style={{ background: WARNA_JENIS.bank_sampah }} />Bank sampah</span>
+        <span><i style={{ background: WARNA_JENIS.b3 }} />Titik B3</span>
+        <span><i style={{ background: WARNA_JENIS.kompos }} />Komposter</span>
       </div>
-      {geoErr && <p className="err-text" role="alert">{geoErr}</p>}
-      {pos && <p className="muted">Posisi dari GPS bisa meleset puluhan meter di dalam gedung. Lokasimu hanya diproses di browser.</p>}
+
+      {geoErr && (
+        <div className="alert" role="alert">
+          <Icon name="location_disabled" size={20} />
+          <span>{geoErr}</span>
+        </div>
+      )}
+      {pos && (
+        <p className="catatan">
+          <Icon name="shield_lock" size={16} />
+          <span>Posisi dari GPS bisa meleset puluhan meter di dalam gedung. Lokasimu hanya diproses di browser.</span>
+        </p>
+      )}
 
       {data && tampil.length === 0 && (
         <p className="pesan-kosong">
@@ -147,15 +197,41 @@ export default function LokasiScreen({ cfg, filterAwal }: { cfg: AppConfig; filt
 
       <ul className="daftar">
         {tampil.map(({ l, jarak }) => (
-          <li key={l.id} style={{ borderLeftColor: WARNA_JENIS[l.jenis] }}>
-            <h3>{l.nama}</h3>
-            <p className="tong">{NAMA_JENIS[l.jenis]}{jarak !== null ? `, ${formatJarak(jarak)}` : ""}</p>
-            <p>{l.alamat}</p>
-            <p>Menerima: {l.menerima.join(", ")}. Jam: {l.jam}. Kontak: {l.kontak}</p>
-            <p className="muted">Diperbarui {l.diperbarui}</p>
-            <div className="row wrap">
-              <a className="btn ghost kecil" href={linkRute(l.lat, l.lng)} target="_blank" rel="noreferrer">Rute</a>
-              <button className="btn ghost kecil" onClick={() => setTerbang([l.lat, l.lng])}>Lihat di peta</button>
+          <li key={l.id} className="card lega lok" style={{ "--j": WARNA_JENIS[l.jenis] } as CSSProperties}>
+            <div className="lok-head">
+              <div className="stack-sm">
+                <span className="jenis-pil">
+                  <Icon name={IKON_JENIS[l.jenis]} size={15} />
+                  {NAMA_JENIS[l.jenis]}{l.statusData === "demo" ? " · Demo" : ""}
+                </span>
+                <h3>{l.nama}</h3>
+              </div>
+              {jarak !== null && <span className="jarak-pil">{formatJarak(jarak)}</span>}
+            </div>
+
+            <div className="info-baris">
+              <Icon name="place" size={18} />
+              <span>{l.alamat}</span>
+            </div>
+            <div className="info-baris">
+              <Icon name="category" size={18} />
+              <span>Menerima: {l.menerima.join(", ")}</span>
+            </div>
+            <div className="info-baris">
+              <Icon name="schedule" size={18} />
+              <span>Jam: {l.jam} · Kontak: {l.kontak}</span>
+            </div>
+
+            <div className="lok-foot">
+              <span className="label-sm muted">Diperbarui {l.diperbarui}</span>
+              <div className="row wrap">
+                <button className="btn ghost kecil" onClick={() => setTerbang([l.lat, l.lng])}>
+                  <Icon name="map" size={16} />Lihat di peta
+                </button>
+                <a className="btn kecil" href={linkRute(l.lat, l.lng)} target="_blank" rel="noreferrer">
+                  <Icon name="directions" size={16} />Rute
+                </a>
+              </div>
             </div>
           </li>
         ))}

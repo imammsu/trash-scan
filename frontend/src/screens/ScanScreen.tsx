@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { AppConfig, Kelas } from "../lib/types";
+import type { AppConfig, Detection, Kelas } from "../lib/types";
 import { putuskan, saringLive } from "../lib/detector";
 import { bekukanVideo, bitmapDariFile } from "../lib/image";
 import { dukungan, type ModelState } from "../lib/useApp";
 import { track } from "../lib/analytics";
 import { jumlahScan, kuisSelesai, tambahScan } from "../lib/state";
+import { IKON_KELAS, namaPendek, teksDiAtas, varKelas } from "../lib/kelasUi";
 import ResultView, { type HasilTampil } from "../components/ResultView";
+import Icon from "../components/Icon";
 
 interface Props {
   cfg: AppConfig;
@@ -19,6 +21,7 @@ export default function ScanScreen({ cfg, model, onCariSetor, onKuis }: Props) {
   const [memproses, setMemproses] = useState(false);
   const [camErr, setCamErr] = useState<string | null>(null);
   const [camOn, setCamOn] = useState(false);
+  const [liveDets, setLiveDets] = useState<Detection[]>([]);
   const [fakta, setFakta] = useState(0);
   const [pesan, setPesan] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -37,7 +40,7 @@ export default function ScanScreen({ cfg, model, onCariSetor, onKuis }: Props) {
     return () => clearInterval(t);
   }, [model.status, cfg.faktaMuat.length]);
 
-  // Kamera dan loop deteksi live
+  // Kamera belakang dan loop deteksi live
   useEffect(() => {
     if (hasil || !dk.kamera || !dk.wasm) return;
     let stop = false;
@@ -84,7 +87,11 @@ export default function ScanScreen({ cfg, model, onCariSetor, onKuis }: Props) {
         last = t;
         try {
           const dets = await det.detect(v, v.videoWidth, v.videoHeight);
-          if (!stop) gambarOverlay(saringLive(dets, cfg.ambang));
+          if (!stop) {
+            const lolos = saringLive(dets, cfg.ambang);
+            setLiveDets(lolos);
+            gambarOverlay(lolos);
+          }
         } catch (e) {
           console.warn(e);
         } finally {
@@ -100,28 +107,53 @@ export default function ScanScreen({ cfg, model, onCariSetor, onKuis }: Props) {
       if (!v || !c || !v.videoWidth) return;
       const rect = v.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
-      if (c.width !== Math.round(rect.width * dpr)) {
-        c.width = Math.round(rect.width * dpr);
-        c.height = Math.round(rect.height * dpr);
+      const cw = Math.round(rect.width * dpr);
+      const ch = Math.round(rect.height * dpr);
+      if (c.width !== cw || c.height !== ch) {
+        c.width = cw;
+        c.height = ch;
       }
-      const k = c.width / v.videoWidth;
+      // Penyesuaian koordinat untuk video object-fit: cover
+      const scale = Math.max(cw / v.videoWidth, ch / v.videoHeight);
+      const ox = (cw - v.videoWidth * scale) / 2;
+      const oy = (ch - v.videoHeight * scale) / 2;
+
       const ctx = c.getContext("2d")!;
-      ctx.clearRect(0, 0, c.width, c.height);
-      ctx.lineWidth = 3 * dpr;
-      ctx.font = `${600} ${14 * dpr}px "Bricolage Grotesque Variable", system-ui, sans-serif`;
+      ctx.clearRect(0, 0, cw, ch);
+      ctx.lineWidth = 2.5 * dpr;
+      ctx.font = `600 ${12 * dpr}px "Inter", "Plus Jakarta Sans", system-ui, sans-serif`;
       ctx.textBaseline = "middle";
+      const rBox = 12 * dpr;
       for (const d of dets) {
         const warna = cfg.kelasDetail[d.kelas].tong.warna;
+        const bx = d.x * scale + ox;
+        const by = d.y * scale + oy;
+        const bw = d.w * scale;
+        const bh = d.h * scale;
+
+        ctx.save();
         ctx.strokeStyle = warna;
-        ctx.strokeRect(d.x * k, d.y * k, d.w * k, d.h * k);
-        const teks = cfg.kelasDetail[d.kelas].nama.replace("Sampah ", "");
-        const tw = ctx.measureText(teks).width + 12 * dpr;
+        ctx.shadowColor = warna;
+        ctx.shadowBlur = 12 * dpr;
+        ctx.beginPath();
+        ctx.roundRect(bx, by, bw, bh, rBox);
+        ctx.stroke();
+        ctx.restore();
+
+        const teks = namaPendek(cfg, d.kelas);
+        const padX = 10 * dpr;
+        const tw = ctx.measureText(teks).width + padX * 2;
         const th = 22 * dpr;
-        const ty = Math.max(0, d.y * k - th);
+        const tx = Math.max(4 * dpr, Math.min(bx + 6 * dpr, cw - tw - 4 * dpr));
+        const ty = Math.max(4 * dpr, by - th / 2);
+
         ctx.fillStyle = warna;
-        ctx.fillRect(d.x * k, ty, tw, th);
-        ctx.fillStyle = d.kelas === "anorganik" ? "#1a1a1a" : "#fff";
-        ctx.fillText(teks, d.x * k + 6 * dpr, ty + th / 2);
+        ctx.beginPath();
+        ctx.roundRect(tx, ty, tw, th, th / 2);
+        ctx.fill();
+
+        ctx.fillStyle = teksDiAtas(d.kelas);
+        ctx.fillText(teks, tx + padX, ty + th / 2 + 0.5 * dpr);
       }
     }
 
@@ -130,6 +162,7 @@ export default function ScanScreen({ cfg, model, onCariSetor, onKuis }: Props) {
       cancelAnimationFrame(raf);
       stream?.getTracks().forEach((t) => t.stop());
       setCamOn(false);
+      setLiveDets([]);
     };
   }, [hasil, dk.kamera, dk.wasm, cfg]);
 
@@ -182,7 +215,8 @@ export default function ScanScreen({ cfg, model, onCariSetor, onKuis }: Props) {
   // ---- Tampilan ----
   if (!dk.wasm) {
     return (
-      <div className="pesan">
+      <div className="card state-card warn">
+        <div className="badge-ikon"><Icon name="devices" size={28} /></div>
         <h2>Browser belum didukung</h2>
         <p>Buka TrashScan di Chrome atau Safari versi terbaru lewat HTTPS. Kamus dan Lokasi tetap bisa dipakai.</p>
       </div>
@@ -191,10 +225,13 @@ export default function ScanScreen({ cfg, model, onCariSetor, onKuis }: Props) {
 
   if (model.status === "error") {
     return (
-      <div className="pesan">
+      <div className="card state-card err">
+        <div className="badge-ikon"><Icon name="error" size={28} /></div>
         <h2>Model gagal dimuat</h2>
         <p>{model.error}</p>
-        <button className="btn" onClick={model.retry}>Coba lagi</button>
+        <button className="btn" onClick={model.retry}>
+          <Icon name="refresh" />Coba lagi
+        </button>
       </div>
     );
   }
@@ -205,48 +242,136 @@ export default function ScanScreen({ cfg, model, onCariSetor, onKuis }: Props) {
 
   const siap = model.status === "ready";
   const persen = model.progress >= 0 ? Math.round(model.progress * 100) : null;
+  const bisaJepret = siap && camOn && !memproses;
 
   return (
-    <div className="scan">
+    <div className="stack">
       {!kuisSelesai("pre") && jumlahScan() === 0 && (
         <button className="banner" onClick={onKuis}>
-          Mau ikut pre-test singkat? Hasilnya anonim dan membantu mengukur belajar.
+          <Icon name="quiz" size={22} />
+          <span className="teks">Mau ikut pre-test singkat? Hasilnya anonim dan membantu mengukur belajar.</span>
+          <Icon name="chevron_right" size={20} />
         </button>
       )}
 
+      {/* Viewfinder Kamera */}
       <div className="viewfinder">
         <video ref={videoRef} playsInline muted aria-label="Pratinjau kamera" />
         <canvas ref={overlayRef} className="overlay" aria-hidden="true" />
-        {!camOn && !camErr && dk.kamera && <p className="vf-pesan">Membuka kamera...</p>}
+        <div className="vf-sudut" aria-hidden="true"><i /><i /><i /><i /></div>
+
+        {camOn && (
+          <div className="vf-status">
+            <span className="pulse" aria-hidden="true" />
+            <span className="label-sm">
+              {siap ? "Kamera Aktif • Arahkan ke sampah" : "Menyiapkan model deteksi..."}
+            </span>
+          </div>
+        )}
+
+        {!camOn && !camErr && dk.kamera && (
+          <div className="vf-pesan">
+            <Icon name="photo_camera" size={32} />
+            <p>Membuka kamera...</p>
+          </div>
+        )}
         {(camErr || !dk.kamera) && (
           <div className="vf-pesan">
+            <Icon name="no_photography" size={32} />
             <p>{camErr ?? "Kamera butuh koneksi HTTPS dan browser yang didukung. Unggah foto sebagai gantinya."}</p>
           </div>
         )}
       </div>
 
+      {/* Area Kontrol Ergonomis: Unggah Foto — Jepret (Tanpa Kamera Depan) */}
+      <div className="kontrol">
+        <button
+          type="button"
+          className="galeri kiri"
+          disabled={!siap || memproses}
+          onClick={() => fileRef.current?.click()}
+        >
+          <Icon name="photo_library" size={20} />
+          <span>Unggah foto</span>
+        </button>
+
+        <div className={"shutter-wrap" + (bisaJepret ? "" : " mati")}>
+          <button
+            type="button"
+            className="shutter"
+            disabled={!bisaJepret}
+            onClick={jepret}
+            aria-label={memproses ? "Memproses..." : "Jepret"}
+          >
+            {memproses ? <span className="spin" aria-hidden="true" /> : <Icon name="photo_camera" size={32} />}
+          </button>
+        </div>
+
+        <div aria-hidden="true" />
+        <input ref={fileRef} type="file" accept="image/*" hidden onChange={onFile} />
+      </div>
+
+      {/* Status pemuatan model (FR-12) */}
       {model.status === "loading" && (
-        <div className="muat" role="status">
+        <div className="card muat" role="status">
+          <div className="muat-head">
+            <div className="row">
+              <Icon name="downloading" size={20} />
+              <strong>Memuat model deteksi{persen !== null ? ` ${persen}%` : ""}</strong>
+            </div>
+          </div>
           <div className="bar" aria-hidden="true">
             <div style={{ width: persen === null ? "40%" : `${persen}%` }} className={persen === null ? "indet" : ""} />
           </div>
-          <p>Memuat model deteksi{persen !== null ? ` ${persen}%` : ""}</p>
-          <p className="muted">{cfg.faktaMuat[fakta]}</p>
+          <div className="fakta-box">
+            <Icon name="lightbulb" size={18} />
+            <p>{cfg.faktaMuat[fakta]}</p>
+          </div>
         </div>
       )}
 
-      {pesan && <p className="err-text" role="alert">{pesan}</p>}
+      {pesan && (
+        <div className="alert" role="alert">
+          <Icon name="error" size={20} />
+          <span>{pesan}</span>
+        </div>
+      )}
 
-      <div className="kontrol">
-        <button className="btn besar" disabled={!siap || !camOn || memproses} onClick={jepret}>
-          {memproses ? "Memproses..." : "Jepret"}
-        </button>
-        <button className="btn ghost besar" disabled={!siap || memproses} onClick={() => fileRef.current?.click()}>
-          Unggah foto
-        </button>
-        <input ref={fileRef} type="file" accept="image/*" hidden onChange={onFile} />
+      {/* Ringkasan deteksi live / petunjuk singkat */}
+      <div className="card live-card">
+        <div className="live-head">
+          <div className="judul label">
+            <Icon name="task_alt" size={18} />
+            <span>
+              {liveDets.length > 0
+                ? `${liveDets.length} Objek Terdeteksi`
+                : "Siap Memindai Sampah"}
+            </span>
+          </div>
+          {liveDets.length > 0 && (
+            <button type="button" className="btn teks kecil" onClick={jepret} disabled={!bisaJepret}>
+              <Icon name="info" size={15} />
+              <span>Lihat Panduan</span>
+            </button>
+          )}
+        </div>
+
+        {liveDets.length > 0 ? (
+          <div className="live-grid">
+            {liveDets.map((d, i) => (
+              <div key={i} className="live-item" style={varKelas(cfg, d.kelas)}>
+                <Icon name={IKON_KELAS[d.kelas]} size={18} />
+                <span>{namaPendek(cfg, d.kelas)}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="catatan">
+            <Icon name="center_focus_strong" size={16} />
+            <span>Arahkan kamera ke satu benda. Kotak dan label muncul saat model mengenali sampahnya.</span>
+          </p>
+        )}
       </div>
-      <p className="catatan">Arahkan kamera ke satu benda. Kotak dan label muncul saat model mengenali sampahnya.</p>
     </div>
   );
 }

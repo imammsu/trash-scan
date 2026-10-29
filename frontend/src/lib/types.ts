@@ -76,6 +76,7 @@ export interface Lokasi {
   jam: string;
   kontak: string;
   diperbarui: string;
+  statusData?: "demo" | "terverifikasi";
 }
 
 export type HasilScan = "ok" | "ragu" | "kosong";

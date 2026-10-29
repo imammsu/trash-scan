@@ -31,14 +31,15 @@ service cloud.firestore {
 
     match /feedback/{id} {
       allow create: if signedIn()
-        && request.resource.data.keys().hasOnly(['uid', 'predicted', 'correct', 'box', 'imageB64', 'createdAt'])
-        && request.resource.data.keys().hasAll(['uid', 'predicted', 'correct', 'imageB64', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['uid', 'predicted', 'correct', 'box', 'imageB64', 'createdAt', 'status'])
+        && request.resource.data.keys().hasAll(['uid', 'predicted', 'correct', 'imageB64', 'createdAt', 'status'])
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.predicted in ['anorganik', 'b3', 'kertas', 'organik', 'residu']
         && request.resource.data.correct in ['anorganik', 'b3', 'kertas', 'organik', 'residu', 'bukan_sampah']
         && request.resource.data.predicted != request.resource.data.correct
         && request.resource.data.imageB64 is string
         && request.resource.data.imageB64.size() < 900000
+        && request.resource.data.status == 'pending'
         && (!('box' in request.resource.data) || (request.resource.data.box is list && request.resource.data.box.size() == 4))
         && request.resource.data.createdAt == request.time
         // wajib bersamaan dengan pembaruan users/{uid} (pembatasan laju)

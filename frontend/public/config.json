@@ -10,9 +10,9 @@
     "perKelas": {}
   },
   "peta": {
-    "pusat": [-2.5, 118],
-    "zoom": 5,
-    "catatan": "GANTI pusat dan zoom dengan area kampanye (mis. [lat, lng] dan 15)."
+    "pusat": [-6.2, 106.82],
+    "zoom": 12,
+    "catatan": "Pusat dan titik lokasi saat ini masih DATA DEMO. Ganti bersama mitra sebelum publikasi."
   },
   "kuis": {
     "soalPerSesi": 6,

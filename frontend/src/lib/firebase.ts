@@ -33,6 +33,31 @@ if (firebaseSiap) {
 export const getApp = () => app;
 export const getDb = () => db;
 
+/** Pesan yang aman ditampilkan kepada pengguna tanpa membocorkan konfigurasi. */
+export function pesanFirebase(kode: string | null | undefined, aksi: "kuis" | "feedback"): string {
+  switch (kode) {
+    case "auth/operation-not-allowed":
+    case "auth/admin-restricted-operation":
+    case "auth/configuration-not-found":
+      return "Login anonim belum diaktifkan di Firebase Console (Authentication > Sign-in method).";
+    case "auth/invalid-api-key":
+    case "auth/invalid-credential":
+      return "Konfigurasi Firebase tidak valid. Periksa API key dan App ID.";
+    case "permission-denied":
+      return `Firestore menolak penyimpanan ${aksi}. Deploy firestore.rules dan pastikan pengguna sudah login anonim.`;
+    case "failed-precondition":
+    case "not-found":
+      return "Firestore belum dibuat atau belum siap. Buat database Firestore di Firebase Console.";
+    case "unavailable":
+    case "network-request-failed":
+      return "Koneksi ke Firebase terputus. Periksa internet lalu coba lagi.";
+    case "resource-exhausted":
+      return "Kuota Firebase sedang habis. Coba lagi nanti.";
+    default:
+      return `Gagal menyimpan ${aksi}${kode ? ` (${kode})` : ""}. Coba lagi.`;
+  }
+}
+
 let uidPromise: Promise<string | null> | null = null;
 export let galatAuth: string | null = null;
 
@@ -42,8 +67,12 @@ export function ensureUid(): Promise<string | null> {
   if (!uidPromise) {
     uidPromise = (async () => {
       try {
-        if (auth!.currentUser) return auth!.currentUser.uid;
+        if (auth!.currentUser) {
+          galatAuth = null;
+          return auth!.currentUser.uid;
+        }
         const cred = await signInAnonymously(auth!);
+        galatAuth = null;
         return cred.user.uid;
       } catch (e) {
         console.warn("Anonymous Auth gagal:", e);
