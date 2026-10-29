@@ -1,5 +1,6 @@
 import { doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { ensureUid, firebaseSiap, galatAuth, getDb } from "./firebase";
+import { batasWaktu } from "./net";
 import { infoKuis, kuisSelesai, tandaiKuisSelesai, urutanSet, jumlahScan, type TipeKuis } from "./state";
 import type { AppConfig, Soal } from "./types";
 
@@ -47,6 +48,8 @@ export interface HasilSimpan {
   ok: boolean;
   /** Penjelasan untuk pengguna/tim bila gagal. */
   alasan?: string;
+  /** Tulis tertahan karena koneksi; terkirim otomatis saat online. */
+  antre?: boolean;
 }
 
 /** Simpan hasil kuis tercatat. Dokumen {uid}_{tipe} hanya bisa di-create sekali. */
@@ -68,7 +71,7 @@ export async function simpanKuis(tipe: TipeKuis, jawaban: JawabanCatat[], versi:
     };
   }
   try {
-    await setDoc(doc(db, "quiz", `${uid}_${tipe}`), {
+    await batasWaktu(setDoc(doc(db, "quiz", `${uid}_${tipe}`), {
       uid,
       tipe,
       skor,
@@ -76,10 +79,14 @@ export async function simpanKuis(tipe: TipeKuis, jawaban: JawabanCatat[], versi:
       jawaban,
       versi,
       createdAt: serverTimestamp(),
-    });
+    }), 12000);
     tandaiKuisSelesai(tipe, skor, jawaban.length);
     return { ok: true };
   } catch (e) {
+    if ((e as Error).message === "timeout") {
+      tandaiKuisSelesai(tipe, skor, jawaban.length);
+      return { ok: true, antre: true };
+    }
     const kode = (e as { code?: string })?.code ?? String(e);
     console.warn("Simpan kuis gagal:", e);
     const alasan =

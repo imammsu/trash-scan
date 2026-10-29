@@ -48,6 +48,26 @@ Tanpa `.env`, scan, kamus, dan peta tetap jalan. Kuis tercatat, feedback, dan an
 
 Urutan `kelas` di `config.json` harus sama dengan urutan model: `anorganik, b3, kertas, organik, residu`.
 
+## PWA
+
+Manifest, ikon, dan service worker (`public/sw.js`) aktif pada build produksi. Model dan WASM disimpan di cache setelah muatan pertama, jadi pemindaian tetap berjalan tanpa internet. Kuis tercatat dan koreksi tetap butuh koneksi (ditahan dan dikirim otomatis saat online). Tombol **Pasang aplikasi** muncul bila browser menawarkannya. Saat mengganti model atau aset besar, naikkan `VERSI` di `sw.js`.
+
+## Situs admin
+
+```bash
+cd admin
+cp .env.example .env     # nilai Firebase sama dengan aplikasi utama
+npm install
+npm run dev              # http://localhost:5174
+```
+
+1. Aktifkan provider **Google** di Authentication, dan tambahkan domain situs admin ke Authorized domains.
+2. Daftarkan akun admin: buat dokumen `admins/{uid}` (isi bebas, mis. `{ "email": "..." }`) lewat konsol. UID terlihat di halaman "Akses ditolak" setelah masuk.
+3. Fitur: tinjau dan koreksi feedback (label dan kotak), statistik pre/post (uji-t berpasangan, CSV), ekspor ZIP format YOLO.
+4. Deploy: `firebase hosting:sites:create trashscan-beafd-admin`, lalu `npm run build && npx firebase deploy --only hosting` dari folder `admin`. Nama situs diatur di `admin/firebase.json`.
+
+Ceklis lengkap terhadap PRD: `CHECKLIST-PRD.md`.
+
 ## Alur pengembangan
 
 `fitur/*` → PR → `dev` → PR → `main` (otomatis deploy). Lihat PRD bagian 16.
@@ -58,7 +78,7 @@ Urutan `kelas` di `config.json` harus sama dengan urutan model: `anorganik, b3, 
 | --- | --- |
 | P0: scan kamera dan unggah, ringkasan, panduan, edukasi, ragu dan kosong, kuis pre/post, keterbatasan | Dibangun |
 | P1: feedback, multi-objek, kamus, lokasi dan peta, analitik, Tentang, mode latihan, App Check (opsional) | Dibangun |
-| P2: situs admin, PWA | Belum (lihat PRD 6.5 dan FR-27) |
+| P2: situs admin (`admin/`), PWA | Dibangun |
 
 ## Yang masih perlu diputuskan atau diuji
 

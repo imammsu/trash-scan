@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
+import { CircleAlert, MapPin, PackageSearch, Search } from "lucide-react";
 import { loadKamus } from "../lib/content";
 import { track } from "../lib/analytics";
+import { IKON_KELAS, namaPendek, teksDi } from "../lib/kelasUi";
 import type { AppConfig, KamusEntry, Kelas } from "../lib/types";
 
 const norm = (s: string) =>
@@ -26,55 +28,73 @@ export default function KamusScreen({ cfg, onCariSetor }: { cfg: AppConfig; onCa
     });
   }, [data, q, filter]);
 
-  // Analitik pencarian (debounce, tanpa mengirim istilah bila ditemukan)
   useEffect(() => {
     const n = norm(q);
     if (n.length < 3 || !data) return;
     const t = setTimeout(() => {
-      const ada = hasil.length > 0;
-      track("kamus_cari", ada ? { ditemukan: "ya" } : { ditemukan: "tidak", istilah: n.slice(0, 30) });
+      track("kamus_cari", hasil.length > 0 ? { ditemukan: "ya" } : { ditemukan: "tidak", istilah: n.slice(0, 30) });
     }, 900);
     return () => clearTimeout(t);
   }, [q, hasil.length, data]);
 
-  if (err) return <div className="pesan"><h2>Kamus gagal dimuat</h2><p>{err}</p></div>;
+  if (err) return <div className="pesan"><span className="ikon-bulat"><CircleAlert size={30} aria-hidden="true" /></span><h2>Kamus gagal dimuat</h2><p>{err}</p></div>;
 
   return (
     <div className="kamus">
       <h2>Kamus Sampah</h2>
+      <p className="muted">Bingung benda ini masuk mana? Cari namanya di sini.</p>
       <label className="cari">
         <span className="sr">Cari nama benda</span>
+        <Search size={20} aria-hidden="true" />
         <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Cari benda, misalnya struk atau baterai" />
       </label>
       <div className="chips" role="group" aria-label="Filter kelas">
-        {cfg.kelas.map((k) => (
-          <button
-            key={k}
-            className={"chip" + (filter === k ? " on" : "")}
-            style={filter === k ? { background: cfg.kelasDetail[k].tong.warna, color: k === "anorganik" ? "#1a1a1a" : "#fff" } : undefined}
-            aria-pressed={filter === k}
-            onClick={() => setFilter(filter === k ? null : k)}
-          >
-            {cfg.kelasDetail[k].nama.replace("Sampah ", "")}
-          </button>
-        ))}
+        {cfg.kelas.map((k) => {
+          const Ikon = IKON_KELAS[k];
+          const w = cfg.kelasDetail[k].tong.warna;
+          return (
+            <button
+              key={k}
+              className="chip"
+              style={filter === k ? { background: w, color: teksDi(w), borderColor: "transparent" } : undefined}
+              aria-pressed={filter === k}
+              onClick={() => setFilter(filter === k ? null : k)}
+            >
+              <Ikon size={16} aria-hidden="true" />
+              {namaPendek(cfg.kelasDetail[k].nama)}
+            </button>
+          );
+        })}
       </div>
 
-      {!q && !filter && <p className="muted">Ketik nama benda, atau pilih kelas untuk melihat daftarnya.</p>}
+      {!q && !filter && (
+        <div className="pesan-kosong"><PackageSearch size={22} aria-hidden="true" /><p className="muted">Ketik nama benda, atau pilih satu kelas untuk melihat daftarnya.</p></div>
+      )}
       {(q || filter) && hasil.length === 0 && (
-        <p>Belum ada "{q}" di kamus. Kami mencatat pencarian ini agar kamus bisa ditambah.</p>
+        <div className="pesan-kosong"><PackageSearch size={22} aria-hidden="true" /><p>Belum ada "{q}" di kamus. Pencarian ini kami catat supaya kamus bisa ditambah.</p></div>
       )}
 
       <ul className="daftar">
         {hasil.map((e) => {
           const d = cfg.kelasDetail[e.kelas];
+          const Ikon = IKON_KELAS[e.kelas];
           return (
-            <li key={e.nama} style={{ borderLeftColor: d.tong.warna }}>
-              <h3>{e.nama}</h3>
-              <p className="tong">{d.nama}. {d.tong.label}</p>
+            <li key={e.nama}>
+              <div className="kepala">
+                <span className="lencana" style={{ background: d.tong.warna, color: teksDi(d.tong.warna) }}><Ikon size={22} aria-hidden="true" /></span>
+                <div>
+                  <h3>{e.nama}</h3>
+                  <p className="tong">{d.nama}</p>
+                </div>
+              </div>
               <p>{e.alasan}</p>
-              <p><strong>Tips:</strong> {e.tips}</p>
-              {d.titikSetor && <button className="btn ghost kecil" onClick={() => onCariSetor(e.kelas)}>Cari tempat setor</button>}
+              <p className="muted"><strong>Tips:</strong> {e.tips}</p>
+              <p className="catatan" style={{ margin: 0 }}>{d.tong.label}</p>
+              {d.titikSetor && (
+                <button className="btn soft kecil" style={{ marginTop: ".5rem" }} onClick={() => onCariSetor(e.kelas)}>
+                  <MapPin size={16} aria-hidden="true" /> Cari tempat setor
+                </button>
+              )}
             </li>
           );
         })}

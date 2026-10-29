@@ -204,6 +204,32 @@
       ],
       "benar": 1,
       "penjelasan": "Mengurangi dari awal lebih baik daripada mengolah setelah jadi sampah."
+    },
+    {
+      "id": "a9",
+      "set": "A",
+      "tanya": "Sachet kopi atau shampo (kemasan berlapis plastik dan foil) masuk kategori apa?",
+      "opsi": [
+        "Kertas",
+        "Residu",
+        "Organik",
+        "B3"
+      ],
+      "benar": 1,
+      "penjelasan": "Kemasan multilapis sulit dipisahkan sehingga sulit didaur ulang, jadi masuk residu."
+    },
+    {
+      "id": "b9",
+      "set": "B",
+      "tanya": "Bungkus snack yang bagian dalamnya mengilap seperti foil masuk kategori apa?",
+      "opsi": [
+        "Organik",
+        "Residu",
+        "Kertas",
+        "B3"
+      ],
+      "benar": 1,
+      "penjelasan": "Kemasan multilapis plastik dan foil umumnya tidak didaur ulang, jadi masuk residu."
     }
   ]
 }

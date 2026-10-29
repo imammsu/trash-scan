@@ -1,0 +1,36 @@
+:root { --ink:#12261f; --paper:#f1f7f4; --surface:#fff; --line:#d2e0d8; --brand:#0e7c66; --err:#b3261e; --muted:#52665e; font-family: system-ui, "Segoe UI", sans-serif; color-scheme: light dark; }
+@media (prefers-color-scheme: dark) { :root { --ink:#e8f2ed; --paper:#0d1a16; --surface:#15251f; --line:#2a4037; --brand:#4fcfae; --err:#ff9a92; --muted:#a2b6ac; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); }
+.pad { padding: 1rem; }
+.masuk { max-width: 420px; margin: 12vh auto; padding: 1rem; display: grid; gap: .8rem; }
+.shell header { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; padding: .6rem 1rem; background: var(--surface); border-bottom: 1px solid var(--line); }
+.shell h1 { font-size: 1.15rem; margin: 0; }
+.shell nav { display: flex; gap: .4rem; flex: 1; flex-wrap: wrap; }
+.shell nav button { font: inherit; display: inline-flex; gap: .4rem; align-items: center; padding: .4rem .8rem; border-radius: 10px; border: 0; background: none; color: var(--ink); cursor: pointer; }
+.shell nav button.on { background: color-mix(in srgb, var(--brand) 16%, transparent); color: var(--brand); font-weight: 650; }
+main { max-width: 1100px; margin: 0 auto; padding: 1rem; }
+.btn { font: inherit; display: inline-flex; gap: .4rem; align-items: center; padding: .5rem .9rem; border-radius: 10px; border: 2px solid var(--brand); background: var(--brand); color: #fff; cursor: pointer; font-weight: 600; }
+.btn.ghost { background: transparent; color: var(--brand); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.chip { font: inherit; padding: .3rem .8rem; border-radius: 999px; border: 2px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+.chip.on { background: var(--brand); color: #fff; border-color: transparent; }
+.bar-aksi { display: flex; gap: .5rem; flex-wrap: wrap; margin: .6rem 0; }
+.err { color: var(--err); font-weight: 600; }
+.muted { color: var(--muted); }
+.grid-stat { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .6rem; margin: 1rem 0; }
+.stat { background: var(--surface); border-radius: 12px; padding: .8rem; display: grid; }
+.stat b { font-size: 1.8rem; }
+table { border-collapse: collapse; background: var(--surface); border-radius: 12px; overflow: hidden; }
+th, td { text-align: left; padding: .5rem .9rem; border-bottom: 1px solid var(--line); }
+.grid-fb { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+.fb { background: var(--surface); border-radius: 14px; padding: .8rem; display: grid; gap: .4rem; align-content: start; }
+.fb p { margin: 0; }
+.gambar { position: relative; line-height: 0; }
+.gambar img { width: 100%; border-radius: 10px; }
+.kotak { position: absolute; border: 3px solid #ff3b30; border-radius: 3px; pointer-events: none; }
+.fb label { display: grid; font-size: .85rem; gap: .15rem; }
+.fb select { font: inherit; padding: .35rem; border-radius: 8px; }
+.box-edit { display: grid; grid-template-columns: 1fr 1fr; gap: .3rem .8rem; }
+.putar { animation: p 1s linear infinite; }
+@keyframes p { to { transform: rotate(360deg); } }

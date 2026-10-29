@@ -1,0 +1,9 @@
+{
+  "hosting": {
+    "site": "trashscan-beafd-admin",
+    "public": "dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [{ "source": "**", "destination": "/index.html" }],
+    "headers": [{ "source": "**", "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }] }]
+  }
+}

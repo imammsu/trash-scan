@@ -1,5 +1,6 @@
 import { doc, collection, increment, serverTimestamp, writeBatch } from "firebase/firestore";
 import { ensureUid, getDb } from "./firebase";
+import { batasWaktu } from "./net";
 
 export interface FeedbackInput {
   predicted: string;
@@ -9,7 +10,7 @@ export interface FeedbackInput {
 }
 
 /** Kirim feedback + perbarui users/{uid} dalam satu batch (rules memakai ini untuk pembatasan laju). */
-export async function kirimFeedback(f: FeedbackInput): Promise<"ok" | "tidak-tersedia" | "ditolak"> {
+export async function kirimFeedback(f: FeedbackInput): Promise<"ok" | "antre" | "tidak-tersedia" | "ditolak"> {
   const db = getDb();
   const uid = await ensureUid();
   if (!db || !uid) return "tidak-tersedia";
@@ -25,9 +26,10 @@ export async function kirimFeedback(f: FeedbackInput): Promise<"ok" | "tidak-ter
       createdAt: serverTimestamp(),
     });
     batch.set(doc(db, "users", uid), { lastAt: serverTimestamp(), count: increment(1) });
-    await batch.commit();
+    await batasWaktu(batch.commit(), 12000);
     return "ok";
   } catch (e) {
+    if ((e as Error).message === "timeout") return "antre"; // tulis tertahan, terkirim otomatis saat online
     console.warn("Kirim feedback gagal:", e);
     return "ditolak";
   }

@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Circle, CircleMarker, MapContainer, Popup, TileLayer, useMap } from "react-leaflet";
+import { CircleAlert, Clock, ExternalLink, LocateFixed, MapPin, MapPinOff, Navigation, Phone, Eye } from "lucide-react";
+import { IKON_KELAS, namaPendek } from "../lib/kelasUi";
 import "leaflet/dist/leaflet.css";
 import { loadLokasi } from "../lib/content";
 import { formatJarak, jarakMeter, linkRute } from "../lib/geo";
@@ -88,78 +90,98 @@ export default function LokasiScreen({ cfg, filterAwal }: { cfg: AppConfig; filt
 
   const kelasPunyaTitik = cfg.kelas.filter((k) => cfg.kelasDetail[k].titikSetor);
 
-  if (err) return <div className="pesan"><h2>Data lokasi gagal dimuat</h2><p>{err}</p></div>;
+  if (err) return <div className="pesan"><span className="ikon-bulat"><CircleAlert size={30} aria-hidden="true" /></span><h2>Data lokasi gagal dimuat</h2><p>{err}</p></div>;
 
   return (
     <div className="lokasi">
       <h2>Tempat setor</h2>
+      <p className="muted">Bank sampah, titik B3, dan komposter terdekat.</p>
       <div className="chips" role="group" aria-label="Filter kelas">
-        <button className={"chip" + (!filter ? " on" : "")} aria-pressed={!filter} onClick={() => setFilter(null)}>Semua</button>
-        {kelasPunyaTitik.map((k) => (
-          <button key={k} className={"chip" + (filter === k ? " on" : "")} aria-pressed={filter === k} onClick={() => setFilter(k)}>
-            {cfg.kelasDetail[k].nama.replace("Sampah ", "")}
-          </button>
-        ))}
+        <button className="chip" style={!filter ? { background: "var(--brand)", color: "var(--brand-ink)", borderColor: "transparent" } : undefined} aria-pressed={!filter} onClick={() => setFilter(null)}>Semua</button>
+        {kelasPunyaTitik.map((k) => {
+          const Ikon = IKON_KELAS[k];
+          return (
+            <button key={k} className="chip" style={filter === k ? { background: "var(--brand)", color: "var(--brand-ink)", borderColor: "transparent" } : undefined} aria-pressed={filter === k} onClick={() => setFilter(k)}>
+              <Ikon size={16} aria-hidden="true" />
+              {namaPendek(cfg.kelasDetail[k].nama)}
+            </button>
+          );
+        })}
       </div>
 
-      <div className="peta">
-        <MapContainer center={cfg.peta.pusat} zoom={cfg.peta.zoom} scrollWheelZoom={false} style={{ height: "100%", width: "100%" }}>
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-            maxZoom={19}
-          />
-          <Terbang tujuan={terbang} />
-          {tampil.map(({ l, jarak }) => (
-            <CircleMarker key={l.id} center={[l.lat, l.lng]} radius={10} pathOptions={{ color: "#fff", weight: 2, fillColor: WARNA_JENIS[l.jenis], fillOpacity: 0.95 }}>
-              <Popup>
-                <strong>{l.nama}</strong>
-                <br />{NAMA_JENIS[l.jenis]}. Menerima: {l.menerima.join(", ")}
-                <br />Jam: {l.jam}
-                {jarak !== null && <><br />Jarak: {formatJarak(jarak)}</>}
-                <br /><a href={linkRute(l.lat, l.lng)} target="_blank" rel="noreferrer">Buka rute di Google Maps</a>
-              </Popup>
-            </CircleMarker>
-          ))}
-          {pos && (
-            <>
-              <Circle center={[pos.lat, pos.lng]} radius={pos.akurasi} pathOptions={{ color: "#1E63B5", weight: 1, fillOpacity: 0.12 }} />
-              <CircleMarker center={[pos.lat, pos.lng]} radius={7} pathOptions={{ color: "#fff", weight: 2, fillColor: "#1E63B5", fillOpacity: 1 }} />
-            </>
-          )}
-        </MapContainer>
-      </div>
+      <div className="lokasi-grid">
+        <div>
+          <div className="peta">
+            <MapContainer center={cfg.peta.pusat} zoom={cfg.peta.zoom} scrollWheelZoom={false} style={{ height: "100%", width: "100%" }}>
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                maxZoom={19}
+              />
+              <Terbang tujuan={terbang} />
+              {tampil.map(({ l, jarak }) => (
+                <CircleMarker key={l.id} center={[l.lat, l.lng]} radius={11} pathOptions={{ color: "#fff", weight: 3, fillColor: WARNA_JENIS[l.jenis], fillOpacity: 0.95 }}>
+                  <Popup>
+                    <strong>{l.nama}</strong>
+                    <br />{NAMA_JENIS[l.jenis]}. Menerima: {l.menerima.join(", ")}
+                    <br />Jam: {l.jam}
+                    {jarak !== null && <><br />Jarak: {formatJarak(jarak)}</>}
+                    <br /><a href={linkRute(l.lat, l.lng)} target="_blank" rel="noreferrer">Buka rute di Google Maps</a>
+                  </Popup>
+                </CircleMarker>
+              ))}
+              {pos && (
+                <>
+                  <Circle center={[pos.lat, pos.lng]} radius={pos.akurasi} pathOptions={{ color: "#1E63B5", weight: 1, fillOpacity: 0.12 }} />
+                  <CircleMarker center={[pos.lat, pos.lng]} radius={8} pathOptions={{ color: "#fff", weight: 3, fillColor: "#1E63B5", fillOpacity: 1 }} />
+                </>
+              )}
+            </MapContainer>
+          </div>
+          <div className="row wrap">
+            <button className="btn soft kecil" style={{ flex: "none" }} onClick={lokasiku}>
+              <LocateFixed size={18} aria-hidden="true" /> Ke lokasiku
+            </button>
+            <span className="legenda"><i style={{ background: WARNA_JENIS.bank_sampah }} />Bank sampah <i style={{ background: WARNA_JENIS.b3 }} />B3 <i style={{ background: WARNA_JENIS.kompos }} />Kompos</span>
+          </div>
+          {geoErr && <p className="err-text" role="alert"><CircleAlert size={18} aria-hidden="true" />{geoErr}</p>}
+          {pos && <p className="catatan">GPS bisa meleset puluhan meter di dalam gedung. Lokasimu hanya diproses di browser.</p>}
+        </div>
 
-      <div className="row wrap">
-        <button className="btn ghost kecil" onClick={lokasiku}>Ke lokasiku</button>
-        <span className="legenda"><i style={{ background: WARNA_JENIS.bank_sampah }} />Bank sampah <i style={{ background: WARNA_JENIS.b3 }} />B3 <i style={{ background: WARNA_JENIS.kompos }} />Kompos</span>
-      </div>
-      {geoErr && <p className="err-text" role="alert">{geoErr}</p>}
-      {pos && <p className="muted">Posisi dari GPS bisa meleset puluhan meter di dalam gedung. Lokasimu hanya diproses di browser.</p>}
-
-      {data && tampil.length === 0 && (
-        <p className="pesan-kosong">
-          {data.length === 0
-            ? "Data titik setor belum diisi untuk area ini. Tim akan menambahkannya bersama mitra."
-            : "Belum ada titik setor untuk kelas ini."}
-        </p>
-      )}
-
-      <ul className="daftar">
-        {tampil.map(({ l, jarak }) => (
-          <li key={l.id} style={{ borderLeftColor: WARNA_JENIS[l.jenis] }}>
-            <h3>{l.nama}</h3>
-            <p className="tong">{NAMA_JENIS[l.jenis]}{jarak !== null ? `, ${formatJarak(jarak)}` : ""}</p>
-            <p>{l.alamat}</p>
-            <p>Menerima: {l.menerima.join(", ")}. Jam: {l.jam}. Kontak: {l.kontak}</p>
-            <p className="muted">Diperbarui {l.diperbarui}</p>
-            <div className="row wrap">
-              <a className="btn ghost kecil" href={linkRute(l.lat, l.lng)} target="_blank" rel="noreferrer">Rute</a>
-              <button className="btn ghost kecil" onClick={() => setTerbang([l.lat, l.lng])}>Lihat di peta</button>
+        <div>
+          {data && tampil.length === 0 && (
+            <div className="pesan-kosong">
+              <MapPinOff size={22} aria-hidden="true" />
+              <p>
+                {data.length === 0
+                  ? "Data titik setor belum diisi untuk area ini. Tim akan menambahkannya bersama mitra."
+                  : "Belum ada titik setor untuk kelas ini."}
+              </p>
             </div>
-          </li>
-        ))}
-      </ul>
+          )}
+          <ul className="daftar">
+            {tampil.map(({ l, jarak }) => (
+              <li key={l.id}>
+                <div className="kepala">
+                  <span className="lencana" style={{ background: WARNA_JENIS[l.jenis], color: "#fff" }}><MapPin size={22} aria-hidden="true" /></span>
+                  <div>
+                    <h3>{l.nama}</h3>
+                    <p className="tong">{NAMA_JENIS[l.jenis]}{jarak !== null ? ` · ${formatJarak(jarak)}` : ""}</p>
+                  </div>
+                </div>
+                <div className="meta"><MapPin size={16} aria-hidden="true" /><p>{l.alamat}</p></div>
+                <div className="meta"><Clock size={16} aria-hidden="true" /><p>{l.jam}</p></div>
+                <div className="meta"><Phone size={16} aria-hidden="true" /><p>{l.kontak}</p></div>
+                <p className="catatan">Menerima: {l.menerima.join(", ")}. Diperbarui {l.diperbarui}.</p>
+                <div className="row wrap">
+                  <a className="btn kecil" href={linkRute(l.lat, l.lng)} target="_blank" rel="noreferrer"><Navigation size={16} aria-hidden="true" /> Rute <ExternalLink size={13} aria-hidden="true" /></a>
+                  <button className="btn ghost kecil" onClick={() => setTerbang([l.lat, l.lng])}><Eye size={16} aria-hidden="true" /> Lihat di peta</button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 }

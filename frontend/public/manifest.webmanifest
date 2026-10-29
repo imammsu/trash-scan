@@ -1,0 +1,17 @@
+{
+  "name": "TrashScan - Pilah Sampah Pintar",
+  "short_name": "TrashScan",
+  "description": "Pilah sampah lewat kamera. Berjalan di browser, tanpa akun.",
+  "lang": "id",
+  "start_url": "/?src=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F1F7F4",
+  "theme_color": "#0E7C66",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

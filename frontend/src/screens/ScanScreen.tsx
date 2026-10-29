@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Camera, CameraOff, CircleAlert, CircleCheck, Crosshair, GraduationCap, ImagePlus, LoaderCircle, ScanSearch, Sparkles, MonitorX, Recycle, RefreshCw } from "lucide-react";
 import type { AppConfig, Kelas } from "../lib/types";
 import { putuskan, saringLive } from "../lib/detector";
 import { bekukanVideo, bitmapDariFile } from "../lib/image";
@@ -183,6 +184,7 @@ export default function ScanScreen({ cfg, model, onCariSetor, onKuis }: Props) {
   if (!dk.wasm) {
     return (
       <div className="pesan">
+        <span className="ikon-bulat"><MonitorX size={30} aria-hidden="true" /></span>
         <h2>Browser belum didukung</h2>
         <p>Buka TrashScan di Chrome atau Safari versi terbaru lewat HTTPS. Kamus dan Lokasi tetap bisa dipakai.</p>
       </div>
@@ -192,9 +194,10 @@ export default function ScanScreen({ cfg, model, onCariSetor, onKuis }: Props) {
   if (model.status === "error") {
     return (
       <div className="pesan">
+        <span className="ikon-bulat"><CircleAlert size={30} aria-hidden="true" /></span>
         <h2>Model gagal dimuat</h2>
         <p>{model.error}</p>
-        <button className="btn" onClick={model.retry}>Coba lagi</button>
+        <button className="btn" onClick={model.retry}><RefreshCw size={18} aria-hidden="true" /> Coba lagi</button>
       </div>
     );
   }
@@ -208,45 +211,86 @@ export default function ScanScreen({ cfg, model, onCariSetor, onKuis }: Props) {
 
   return (
     <div className="scan">
+      <div className="salam">
+        <Recycle size={28} color="var(--brand)" aria-hidden="true" />
+        <div>
+          <h2 style={{ margin: 0 }}>Halo! Mau buang apa hari ini?</h2>
+          <p className="muted">Arahkan kamera ke satu benda, lalu jepret.</p>
+        </div>
+      </div>
+
       {!kuisSelesai("pre") && jumlahScan() === 0 && (
         <button className="banner" onClick={onKuis}>
-          Mau ikut pre-test singkat? Hasilnya anonim dan membantu mengukur belajar.
+          <GraduationCap size={24} aria-hidden="true" />
+          <span>Mau ikut pre-test singkat dulu? Anonim, dan membantu mengukur apa yang kamu pelajari.</span>
         </button>
       )}
 
-      <div className="viewfinder">
-        <video ref={videoRef} playsInline muted aria-label="Pratinjau kamera" />
-        <canvas ref={overlayRef} className="overlay" aria-hidden="true" />
-        {!camOn && !camErr && dk.kamera && <p className="vf-pesan">Membuka kamera...</p>}
-        {(camErr || !dk.kamera) && (
-          <div className="vf-pesan">
-            <p>{camErr ?? "Kamera butuh koneksi HTTPS dan browser yang didukung. Unggah foto sebagai gantinya."}</p>
-          </div>
-        )}
-      </div>
-
-      {model.status === "loading" && (
-        <div className="muat" role="status">
-          <div className="bar" aria-hidden="true">
-            <div style={{ width: persen === null ? "40%" : `${persen}%` }} className={persen === null ? "indet" : ""} />
-          </div>
-          <p>Memuat model deteksi{persen !== null ? ` ${persen}%` : ""}</p>
-          <p className="muted">{cfg.faktaMuat[fakta]}</p>
+      <div className="scan-grid">
+        <div className="viewfinder">
+          <video ref={videoRef} playsInline muted aria-label="Pratinjau kamera" />
+          <canvas ref={overlayRef} className="overlay" aria-hidden="true" />
+          {camOn && (
+            <>
+              <div className="bingkai" aria-hidden="true"><i /><i /><i /><i /></div>
+              <p className="hint"><Crosshair size={15} aria-hidden="true" /> Satu benda dalam bingkai</p>
+            </>
+          )}
+          {!camOn && !camErr && dk.kamera && (
+            <div className="vf-pesan"><LoaderCircle className="putar" size={30} aria-hidden="true" /><p>Membuka kamera...</p></div>
+          )}
+          {(camErr || !dk.kamera) && (
+            <div className="vf-pesan">
+              <CameraOff size={34} aria-hidden="true" />
+              <p>{camErr ?? "Kamera butuh koneksi HTTPS dan browser yang didukung. Unggah foto sebagai gantinya."}</p>
+            </div>
+          )}
         </div>
-      )}
 
-      {pesan && <p className="err-text" role="alert">{pesan}</p>}
+        <div className="side-col">
+          <div className="kartu-info">
+            {model.status === "loading" ? (
+              <div role="status">
+                <div className="status-model">
+                  <LoaderCircle className="putar" size={22} aria-hidden="true" />
+                  <p><strong>Menyiapkan model deteksi{persen !== null ? ` ${persen}%` : ""}</strong></p>
+                </div>
+                <div className="bar" aria-hidden="true">
+                  <div style={{ width: persen === null ? "40%" : `${persen}%` }} className={persen === null ? "indet" : ""} />
+                </div>
+                <p className="muted" style={{ margin: 0 }}><Sparkles size={15} aria-hidden="true" style={{ verticalAlign: "-2px" }} /> {cfg.faktaMuat[fakta]}</p>
+              </div>
+            ) : (
+              <div className="status-model">
+                <CircleCheck size={22} className="ok" aria-hidden="true" />
+                <p><strong>Siap memindai.</strong> Semua berjalan di perangkatmu, fotomu tidak diunggah.</p>
+              </div>
+            )}
+          </div>
 
-      <div className="kontrol">
-        <button className="btn besar" disabled={!siap || !camOn || memproses} onClick={jepret}>
-          {memproses ? "Memproses..." : "Jepret"}
-        </button>
-        <button className="btn ghost besar" disabled={!siap || memproses} onClick={() => fileRef.current?.click()}>
-          Unggah foto
-        </button>
-        <input ref={fileRef} type="file" accept="image/*" hidden onChange={onFile} />
+          {pesan && <p className="err-text" role="alert"><CircleAlert size={18} aria-hidden="true" />{pesan}</p>}
+
+          <div className="kontrol">
+            <button className="btn besar" disabled={!siap || !camOn || memproses} onClick={jepret}>
+              {memproses ? <LoaderCircle className="putar" size={22} aria-hidden="true" /> : <Camera size={22} aria-hidden="true" />}
+              {memproses ? "Memproses..." : "Jepret"}
+            </button>
+            <button className="btn ghost besar" disabled={!siap || memproses} onClick={() => fileRef.current?.click()}>
+              <ImagePlus size={22} aria-hidden="true" /> Unggah foto
+            </button>
+            <input ref={fileRef} type="file" accept="image/*" hidden onChange={onFile} />
+          </div>
+
+          <div className="kartu-info">
+            <h4 style={{ marginTop: 0 }}><ScanSearch size={18} aria-hidden="true" /> Cara pakai</h4>
+            <ol className="langkah">
+              <li><span className="no"><Camera size={18} aria-hidden="true" /></span>Arahkan kamera ke satu benda.</li>
+              <li><span className="no"><Crosshair size={18} aria-hidden="true" /></span>Tunggu kotak dan label muncul, lalu jepret.</li>
+              <li><span className="no"><Recycle size={18} aria-hidden="true" /></span>Ikuti panduan membuang, lalu cari tempat setor bila perlu.</li>
+            </ol>
+          </div>
+        </div>
       </div>
-      <p className="catatan">Arahkan kamera ke satu benda. Kotak dan label muncul saat model mengenali sampahnya.</p>
     </div>
   );
 }
