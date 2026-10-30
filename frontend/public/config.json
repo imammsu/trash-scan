@@ -3,9 +3,9 @@
   "kelas": ["anorganik", "b3", "kertas", "organik", "residu"],
   "model": { "url": "/model/sampah_yolo11n.onnx", "ukuran": 416 },
   "ambang": {
-    "live": 0.5,
-    "capture": 0.6,
-    "floor": 0.25,
+    "live": 0.4,
+    "capture": 0.5,
+    "floor": 0.2,
     "nmsIou": 0.45,
     "perKelas": {}
   },
